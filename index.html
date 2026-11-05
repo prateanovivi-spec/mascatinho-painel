@@ -5,7 +5,7 @@
 <title>Mascatinho Hub</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800&family=Nunito+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800&family=Nunito+Sans:wght@400;600;700&family=Cormorant+Garamond:wght@600;700&display=swap" rel="stylesheet">
 <style>
 /* Layout: menu roxo fixo à esquerda (vira barra no celular) + área clara com quadros, lista e próximas ações */
 :root {
@@ -162,6 +162,44 @@ svg.grafico { width:100%; height:auto; display:block }
 .olho:focus-visible { outline:2px solid var(--brand) }
 body { margin:0 }
 [hidden] { display:none !important }   /* a tela de entrar some depois do login */
+/* ===== 05/11 (pedido dela): visual feminino e elegante — rosa antigo na lateral, linhas douradas ===== */
+:root {
+  --bg:#FBF7F4; --surface:#FFFFFF; --ink:#3A2A2E; --muted:#7D6A6E; --line:#EADCC6;
+  --brand:#A65468; --brand-ink:#FFFFFF; --brand-soft:#F7E8EB; --brand-text:#8C3F55;
+  --side-a:#C98F98; --side-b:#9B5C69; --side-ink:#FFF7F5; --side-muted:#F6DADC; --side-hover:rgba(255,255,255,.14);
+  --gold:#C4A15A; --gold-soft:#E6D3A8; --serif:"Cormorant Garamond", Georgia, serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg:#1C1517; --surface:#261C1F; --ink:#F5ECEA; --muted:#BFA9AC; --line:#4A3A2C;
+  --brand:#E0A3B2; --brand-ink:#2A1A1F; --brand-soft:#3A262C; --brand-text:#F0BFCB;
+  --side-a:#5A3540; --side-b:#36202A; --side-ink:#FBEDEE; --side-muted:#E2C2C8; --side-hover:rgba(255,255,255,.08);
+  --gold:#D6B672; --gold-soft:#6B5634 } }
+:root[data-theme="dark"] {
+  --bg:#1C1517; --surface:#261C1F; --ink:#F5ECEA; --muted:#BFA9AC; --line:#4A3A2C;
+  --brand:#E0A3B2; --brand-ink:#2A1A1F; --brand-soft:#3A262C; --brand-text:#F0BFCB;
+  --side-a:#5A3540; --side-b:#36202A; --side-ink:#FBEDEE; --side-muted:#E2C2C8; --side-hover:rgba(255,255,255,.08);
+  --gold:#D6B672; --gold-soft:#6B5634 }
+aside { border-right:1px solid var(--gold) }
+.logo { box-shadow:0 0 0 3px var(--gold), 0 8px 26px rgba(80,30,40,.28) }
+nav a.ativo { background:rgba(255,255,255,.94); color:var(--brand-text); box-shadow:inset 3px 0 0 var(--gold) }
+.btn-side { background:#F6E3E1; color:#7A3546; box-shadow:inset 0 0 0 1px var(--gold) } .btn-side:hover { background:#FBEEEC }
+.topo h1, .cartao h2, .entrar h1, .plano h3 { font-family:var(--serif); letter-spacing:.01em }
+.topo h1 { font-size:36px; font-weight:700 }
+.topo h1::after { content:""; display:block; width:64px; height:2px; margin-top:6px; background:linear-gradient(90deg,var(--gold),transparent) }
+.cartao h2 { font-size:24px; padding-bottom:8px; border-bottom:1px solid var(--gold-soft) }
+.cartao, .plano { border:1px solid var(--gold-soft); box-shadow:0 1px 0 rgba(196,161,90,.25) }
+.kpi { box-shadow:inset 0 0 0 1px var(--gold-soft) }
+.tab[aria-selected="true"] { box-shadow:inset 0 -2px 0 var(--gold) }
+.btn-brand { background:var(--brand); box-shadow:inset 0 0 0 1px rgba(196,161,90,.55) }
+.fresco, .busca input { border-color:var(--gold-soft) }
+.entrar { background:linear-gradient(160deg,var(--side-a),var(--side-b)) }
+.entrar form { box-shadow:0 0 0 1px var(--gold), 0 20px 60px rgba(60,20,30,.35) }
+.entrar img { box-shadow:0 0 0 3px var(--gold) }
+:root:not([data-theme="dark"]) { --mint:#EDF2EA; --mint-ink:#4F7358; --lav:#F6E9EE; --lav-ink:#8C3F55;
+  --butter:#FAF0DC; --butter-ink:#8A6A2A; --blush:#FAE6E4; --blush-ink:#A8434F }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --mint:#22302A; --mint-ink:#A9CDB2; --lav:#3A262C; --lav-ink:#F0BFCB;
+  --butter:#3A3020; --butter-ink:#E8CB8A; --blush:#3E2226; --blush-ink:#F3A9B1 } }
+
 /* finanças */
 .fin-topo { display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:16px }
 .fin-mes { display:flex; align-items:center; gap:8px; font:700 14px var(--display); color:var(--muted); margin-right:auto }
