@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Clube Mascatinho · Renovação</title>
+  <meta name="description" content="Escolha o seu pacote e renove com Pix ou cartão.">
+  <meta property="og:title" content="Clube Mascatinho · Renove o seu acesso 💖">
+  <meta property="og:description" content="Escolha o seu pacote: Pix copia e cola ou cartão de crédito.">
+  <meta property="og:image" content="https://capable-llama-18bc66.netlify.app/previa.jpg">
+  <meta property="og:url" content="https://capable-llama-18bc66.netlify.app">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root { --rosa:#e2457a; --rosa-claro:#fde7ef; --vinho:#5b1d2e; --texto:#3d2a30; --fundo:#fff8fa; --card:#ffffff; --borda:#f6cddc; --verde:#16a085; }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) { --rosa-claro:#3a1f29; --texto:#f6e9ee; --fundo:#1e1418; --card:#2a1c22; --borda:#4a2a37; --vinho:#ffc9da; }
+    }
+    * { box-sizing:border-box }
+    body { margin:0; background:var(--fundo); color:var(--texto); font-family:Nunito, system-ui, sans-serif; }
+    header { text-align:center; padding:28px 16px 8px; background:linear-gradient(180deg,var(--rosa-claro),transparent); }
+    .logo { font-family:"Dancing Script", cursive; font-size:46px; color:var(--vinho); margin:0; line-height:1 }
+    .tag { letter-spacing:.25em; font-size:12px; font-weight:800; color:var(--vinho); margin:6px 0 0 }
+    .intro { max-width:520px; margin:14px auto 0; font-size:16px }
+    main { max-width:960px; margin:0 auto; padding:16px; display:grid; gap:14px; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); }
+    .pacote { position:relative; background:var(--card); border:1.5px solid var(--borda); border-radius:18px; padding:20px 16px; text-align:center; }
+    .pacote.destaque { border-color:var(--rosa); box-shadow:0 6px 20px rgba(226,69,122,.15) }
+    .selo { position:absolute; top:-11px; left:50%; transform:translateX(-50%); background:var(--rosa); color:#fff; font-size:12px; font-weight:800; padding:3px 10px; border-radius:99px; white-space:nowrap }
+    h2 { margin:4px 0 0; font-size:20px }
+    .preco { font-size:32px; font-weight:800; color:var(--rosa); margin:6px 0 0 }
+    .sub { margin:2px 0 14px; font-size:14px; opacity:.8 }
+    .btn { display:block; width:100%; border:0; border-radius:12px; padding:13px 10px; font:800 15px Nunito, sans-serif; cursor:pointer; text-decoration:none; margin-top:8px }
+    .pix-btn { background:var(--verde); color:#fff }
+    .pix-btn.ok { background:#0e6f5c }
+    .cartao-btn { background:#009ee3; color:#fff }
+    .cartao-sub { margin:6px 0 0; font-size:13px }
+    .link-qr { background:none; border:0; color:var(--rosa); font:700 14px Nunito, sans-serif; margin-top:8px; cursor:pointer; text-decoration:underline }
+    .qr { display:flex; justify-content:center; margin-top:10px; padding:10px; background:#fff; border-radius:12px }
+    .chave { max-width:520px; margin:6px auto 0; padding:0 16px; text-align:center }
+    .chave .caixa { background:var(--card); border:1.5px dashed var(--rosa); border-radius:14px; padding:14px }
+    .chave b { font-size:22px; color:var(--vinho); letter-spacing:.04em }
+    footer { text-align:center; padding:18px 16px 32px; font-size:15px }
+    .aviso { position:fixed; left:50%; bottom:22px; transform:translateX(-50%); background:var(--vinho); color:#fff; padding:10px 16px; border-radius:99px; font-weight:700; display:none }
+  </style>
+</head>
+<body>
+  <header>
+    <p class="logo">Mascatinho</p>
+    <p class="tag">PAPEL COM AMOR 🦙</p>
+    <p class="intro">Escolha o seu pacote para renovar o acesso ao <b>Clube Mascatinho</b>: arquivos, cursos e novidades. 💖</p>
+  </header>
+  <main>
+    <article class="pacote">
+      
+      <h2>Mensal</h2>
+      <p class="preco">R$ 30,00</p>
+      <p class="sub">1 mês de acesso</p>
+      <button class="btn pix-btn" type="button" data-codigo="00020126360014br.gov.bcb.pix0114+5511963153301520400005303986540530.005802BR5925VIVIANE APARECIDA AUGUSTO6009SAO PAULO62070503***6304F9B6">Copiar Pix copia e cola</button>
+      <button class="link-qr" type="button" data-qr="00020126360014br.gov.bcb.pix0114+5511963153301520400005303986540530.005802BR5925VIVIANE APARECIDA AUGUSTO6009SAO PAULO62070503***6304F9B6">ver QR code</button>
+      <div class="qr" hidden></div>
+      <a class="btn cartao-btn" href="https://mpago.li/31iFnnC" target="_blank" rel="noopener">💳 Pagar no cartão de crédito</a><p class="sub cartao-sub">no cartão: R$ 31,57 (com a taxa do cartão)</p>
+    </article>
+    <article class="pacote">
+      
+      <h2>Trimestral</h2>
+      <p class="preco">R$ 75,00</p>
+      <p class="sub">3 meses · sai R$ 25 por mês</p>
+      <button class="btn pix-btn" type="button" data-codigo="00020126360014br.gov.bcb.pix0114+5511963153301520400005303986540575.005802BR5925VIVIANE APARECIDA AUGUSTO6009SAO PAULO62070503***63045D02">Copiar Pix copia e cola</button>
+      <button class="link-qr" type="button" data-qr="00020126360014br.gov.bcb.pix0114+5511963153301520400005303986540575.005802BR5925VIVIANE APARECIDA AUGUSTO6009SAO PAULO62070503***63045D02">ver QR code</button>
+      <div class="qr" hidden></div>
+      <a class="btn cartao-btn" href="https://mpago.li/1iYbsLL" target="_blank" rel="noopener">💳 Pagar no cartão de crédito</a><p class="sub cartao-sub">no cartão: R$ 78,93 (com a taxa do cartão)</p>
+    </article>
+    <article class="pacote">
+      
+      <h2>Semestral</h2>
+      <p class="preco">R$ 129,00</p>
+      <p class="sub">6 meses · sai R$ 21,50 por mês</p>
+      <button class="btn pix-btn" type="button" data-codigo="00020126360014br.gov.bcb.pix0114+55119631533015204000053039865406129.005802BR5925VIVIANE APARECIDA AUGUSTO6009SAO PAULO62070503***6304890C">Copiar Pix copia e cola</button>
+      <button class="link-qr" type="button" data-qr="00020126360014br.gov.bcb.pix0114+55119631533015204000053039865406129.005802BR5925VIVIANE APARECIDA AUGUSTO6009SAO PAULO62070503***6304890C">ver QR code</button>
+      <div class="qr" hidden></div>
+      <a class="btn cartao-btn" href="https://mpago.li/1S6sPn6" target="_blank" rel="noopener">💳 Pagar no cartão de crédito</a><p class="sub cartao-sub">no cartão: R$ 135,76 (com a taxa do cartão)</p>
+    </article>
+    <article class="pacote destaque">
+      <span class="selo">mais econômico</span>
+      <h2>Anual</h2>
+      <p class="preco">R$ 219,00</p>
+      <p class="sub">12 meses · sai R$ 18,25 por mês</p>
+      <button class="btn pix-btn" type="button" data-codigo="00020126360014br.gov.bcb.pix0114+55119631533015204000053039865406219.005802BR5925VIVIANE APARECIDA AUGUSTO6009SAO PAULO62070503***6304663E">Copiar Pix copia e cola</button>
+      <button class="link-qr" type="button" data-qr="00020126360014br.gov.bcb.pix0114+55119631533015204000053039865406219.005802BR5925VIVIANE APARECIDA AUGUSTO6009SAO PAULO62070503***6304663E">ver QR code</button>
+      <div class="qr" hidden></div>
+      <a class="btn cartao-btn" href="https://mpago.li/1HEp5yn" target="_blank" rel="noopener">💳 Pagar no cartão de crédito</a><p class="sub cartao-sub">no cartão: R$ 230,48 (com a taxa do cartão)</p>
+    </article>
+  </main>
+  <section class="chave">
+    <div class="caixa">
+      Prefere digitar? Chave Pix (celular):<br><b>11963153301</b><br>
+      <button class="btn pix-btn" type="button" data-codigo="11963153301" style="max-width:260px;margin:10px auto 0">Copiar chave Pix</button>
+    </div>
+  </section>
+  <footer>Depois de pagar, <b>me mande o comprovante no WhatsApp</b> (na mesma conversa). Obrigada! 💖</footer>
+  <div class="aviso" id="aviso">Copiado! Agora é só colar no app do seu banco.</div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script>
+    function avisar() { var a = document.getElementById("aviso"); a.style.display = "block"; setTimeout(function () { a.style.display = "none"; }, 2600); }
+    function copiar(t, b) {
+      function ok() { avisar(); if (b) { var o = b.textContent; b.classList.add("ok"); b.textContent = "✓ Copiado!"; setTimeout(function () { b.textContent = o; b.classList.remove("ok"); }, 2600); } }
+      if (navigator.clipboard && window.isSecureContext) { navigator.clipboard.writeText(t).then(ok, function () { velho(t); ok(); }); } else { velho(t); ok(); }
+    }
+    function velho(t) { var x = document.createElement("textarea"); x.value = t; x.style.position = "fixed"; x.style.opacity = "0"; document.body.appendChild(x); x.select(); try { document.execCommand("copy"); } catch (e) {} document.body.removeChild(x); }
+    document.querySelectorAll("[data-codigo]").forEach(function (b) { b.addEventListener("click", function () { copiar(b.getAttribute("data-codigo"), b); }); });
+    document.querySelectorAll("[data-qr]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        var box = b.nextElementSibling;
+        if (!box.hasChildNodes() && window.QRCode) new QRCode(box, { text: b.getAttribute("data-qr"), width: 190, height: 190, correctLevel: QRCode.CorrectLevel.M });
+        box.hidden = !box.hidden; b.textContent = box.hidden ? "ver QR code" : "esconder QR code";
+      });
+    });
+  </script>
+</body>
+</html>
