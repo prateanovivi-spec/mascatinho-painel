@@ -1,0 +1,1570 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<title>Mascatinho Hub</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800&family=Nunito+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+/* Layout: menu roxo fixo à esquerda (vira barra no celular) + área clara com quadros, lista e próximas ações */
+:root {
+  --bg:#F7F5FB; --surface:#FFFFFF; --ink:#2A2140; --muted:#6E6585; --line:#ECE8F3;
+  --brand:#7B4FD6; --brand-ink:#FFFFFF; --brand-soft:#EFE7FB; --brand-text:#6236BF;
+  --side-a:#5E3CA3; --side-b:#3B2370; --side-ink:#F3EEFF; --side-muted:#CDBDF0; --side-hover:rgba(255,255,255,.10);
+  --mint:#E3F5EC; --mint-ink:#23835A; --lav:#F0E8FC; --lav-ink:#6A3FC4;
+  --butter:#FFF4D6; --butter-ink:#9A6B05; --blush:#FDE7EA; --blush-ink:#C23A4B;
+  --peach:#FDEBDD; --peach-ink:#B5571C; --gray:#EFEDF3; --gray-ink:#6B6578;
+  --display:"Nunito", "Segoe UI", system-ui, sans-serif; --body:"Nunito Sans", "Segoe UI", system-ui, sans-serif;
+  --r:16px;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg:#16121E; --surface:#201A2B; --ink:#F1ECFA; --muted:#A99FBF; --line:#322A42;
+  --brand:#A98BF0; --brand-ink:#1A1326; --brand-soft:#2D2343; --brand-text:#C7B2FA;
+  --side-a:#2E1F52; --side-b:#1C1235; --side-ink:#F3EEFF; --side-muted:#B7A5E0; --side-hover:rgba(255,255,255,.08);
+  --mint:#173329; --mint-ink:#7FD8AE; --lav:#2A2143; --lav-ink:#C7B2FA;
+  --butter:#352B12; --butter-ink:#F0C964; --blush:#3A1D24; --blush-ink:#F59AA6;
+  --peach:#3A2516; --peach-ink:#F2AC7C; --gray:#2A2535; --gray-ink:#BEB6CC; color-scheme:dark } }
+:root[data-theme="dark"] {
+  --bg:#16121E; --surface:#201A2B; --ink:#F1ECFA; --muted:#A99FBF; --line:#322A42;
+  --brand:#A98BF0; --brand-ink:#1A1326; --brand-soft:#2D2343; --brand-text:#C7B2FA;
+  --side-a:#2E1F52; --side-b:#1C1235; --side-ink:#F3EEFF; --side-muted:#B7A5E0; --side-hover:rgba(255,255,255,.08);
+  --mint:#173329; --mint-ink:#7FD8AE; --lav:#2A2143; --lav-ink:#C7B2FA;
+  --butter:#352B12; --butter-ink:#F0C964; --blush:#3A1D24; --blush-ink:#F59AA6;
+  --peach:#3A2516; --peach-ink:#F2AC7C; --gray:#2A2535; --gray-ink:#BEB6CC; color-scheme:dark }
+* { box-sizing:border-box }
+body { background:var(--bg); color:var(--ink); font:15px/1.5 var(--body) }
+button, input, select { font:inherit; color:inherit }
+.app { display:grid; grid-template-columns:248px minmax(0,1fr); min-height:100vh }
+/* menu */
+aside { background:linear-gradient(180deg,var(--side-a),var(--side-b)); color:var(--side-ink); padding:22px 16px;
+        position:sticky; top:env(safe-area-inset-top, 0px); height:100vh; display:flex; flex-direction:column; gap:18px }
+.logo { display:block; width:150px; height:150px; margin:0 auto; border-radius:50%; background:#fff;
+        box-shadow:0 6px 24px rgba(0,0,0,.25); object-fit:cover }
+nav { display:flex; flex-direction:column; gap:4px }
+nav a { display:flex; align-items:center; gap:12px; padding:11px 14px; border-radius:12px; color:var(--side-ink);
+        text-decoration:none; font:700 15px var(--display) }
+nav a svg { width:20px; height:20px; flex:none; stroke:currentColor; fill:none; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round }
+nav a:hover, nav a:focus-visible { background:var(--side-hover); outline:none }
+nav a.ativo { background:rgba(255,255,255,.92); color:#4A2A86 }
+.side-cta { margin-top:auto }
+.btn { display:inline-flex; align-items:center; justify-content:center; gap:8px; border:0; border-radius:12px;
+       padding:10px 16px; font:700 14px var(--display); cursor:pointer; text-decoration:none }
+.btn svg { width:18px; height:18px; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round }
+.btn-brand { background:var(--brand); color:var(--brand-ink) } .btn-brand:hover { filter:brightness(1.07) }
+.btn-side { width:100%; background:#A98BF0; color:#1E1236; padding:13px } .btn-side:hover { background:#BBA2F5 }
+.btn-ghost { background:var(--surface); color:var(--ink); box-shadow:inset 0 0 0 1px var(--line) }
+.btn-ghost:hover { box-shadow:inset 0 0 0 1px var(--brand) }
+.btn:focus-visible, .tab:focus-visible, .icon-btn:focus-visible { outline:2px solid var(--brand); outline-offset:2px }
+.btn[disabled] { opacity:.55; cursor:not-allowed }
+/* topo */
+main { padding:24px max(16px, env(safe-area-inset-right, 0px)) 64px 28px; min-width:0 }
+.topo { display:flex; align-items:center; gap:16px; flex-wrap:wrap; margin-bottom:20px }
+.topo h1 { margin:0; font:800 30px/1.1 var(--display) }
+.topo p { margin:2px 0 0; color:var(--muted) }
+.topo .titulo { flex:1 1 260px; min-width:0 }
+.busca { flex:0 1 340px; position:relative }
+.busca input { width:100%; padding:11px 14px 11px 40px; border-radius:14px; border:1px solid var(--line); background:var(--surface) }
+.busca input:focus { outline:2px solid var(--brand); outline-offset:0 }
+.busca svg { position:absolute; left:13px; top:50%; translate:0 -50%; width:18px; height:18px; stroke:var(--muted); fill:none; stroke-width:2 }
+.fresco { font-size:12px; color:var(--muted); background:var(--surface); border:1px solid var(--line); padding:6px 10px; border-radius:99px }
+.aviso { padding:12px 16px; border-radius:12px; background:var(--butter); color:var(--butter-ink); margin-bottom:16px; font-weight:600 }
+/* quadros */
+.kpis { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:16px; margin-bottom:20px }
+.kpi { border-radius:var(--r); padding:18px 20px; display:grid; grid-template-columns:auto 1fr; gap:4px 16px; align-items:center }
+.kpi .ic { grid-row:span 2; width:48px; height:48px; display:grid; place-items:center }
+.kpi .ic svg { width:40px; height:40px; stroke:currentColor; fill:none; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round }
+.kpi .rot { font:700 15px var(--display) }
+.kpi .linha { display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap }
+.kpi .num { font:800 32px/1.1 var(--display); font-variant-numeric:tabular-nums; color:var(--ink) }
+.kpi .sub { font-size:12px; opacity:.85 }
+.kpi a { font:700 13px var(--display); padding:5px 12px; border-radius:99px; background:rgba(255,255,255,.55); color:inherit; text-decoration:none; white-space:nowrap }
+:root[data-theme="dark"] .kpi a { background:rgba(255,255,255,.08) }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .kpi a { background:rgba(255,255,255,.08) } }
+.kpi .k-venc { grid-column:1/-1; list-style:none; margin:6px 0 0; padding:0; font-size:13px; line-height:1.5 }
+.k-mint { background:var(--mint); color:var(--mint-ink) } .k-lav { background:var(--lav); color:var(--lav-ink) }
+.k-butter { background:var(--butter); color:var(--butter-ink) } .k-blush { background:var(--blush); color:var(--blush-ink) }
+.grade { display:grid; grid-template-columns:minmax(0,1fr) 340px; gap:20px; align-items:start }
+.col { display:flex; flex-direction:column; gap:20px; min-width:0 }
+.cartao { background:var(--surface); border:1px solid var(--line); border-radius:var(--r); padding:18px 20px; min-width:0 }
+.cartao h2 { display:flex; align-items:center; gap:10px; margin:0 0 12px; font:800 20px var(--display) }
+.cartao h2 svg { width:22px; height:22px; stroke:var(--brand-text); fill:none; stroke-width:1.9; stroke-linecap:round; stroke-linejoin:round }
+.cartao h2 .dir { margin-left:auto }
+.cartao .explica { margin:-6px 0 12px; color:var(--muted); font-size:14px; max-width:75ch }
+.tabs { display:flex; gap:4px; flex-wrap:wrap; border-bottom:1px solid var(--line); margin-bottom:6px }
+.tab { border:0; background:none; padding:8px 12px; border-radius:10px 10px 0 0; cursor:pointer; color:var(--muted); font-weight:700 }
+.tab[aria-selected="true"] { color:var(--ink); box-shadow:inset 0 -3px 0 var(--brand) }
+.rolar { overflow-x:auto }
+table { width:100%; border-collapse:collapse; font-size:14px }
+th { text-align:left; font:700 12px var(--display); color:var(--muted); padding:10px; border-bottom:1px solid var(--line); white-space:nowrap }
+td { padding:10px; border-bottom:1px solid var(--line); vertical-align:middle; font-variant-numeric:tabular-nums }
+tr:last-child td { border-bottom:0 }
+.pessoa { display:flex; align-items:center; gap:10px; min-width:180px }
+.av { width:34px; height:34px; border-radius:50%; display:grid; place-items:center; font:800 12px var(--display); flex:none }
+.nome { font-weight:700 } .sub { font-size:12px; color:var(--muted) }
+.chip { display:inline-block; padding:3px 11px; border-radius:99px; font:700 12px var(--display); white-space:nowrap }
+.s-ok { background:var(--mint); color:var(--mint-ink) } .s-venc { background:var(--butter); color:var(--butter-ink) }
+.s-vencido { background:var(--peach); color:var(--peach-ink) } .s-atraso { background:var(--blush); color:var(--blush-ink) }
+.s-saiu { box-shadow:inset 0 0 0 1.5px var(--blush-ink); color:var(--blush-ink) } .s-conf { background:var(--gray); color:var(--gray-ink) }
+.s-lanc { background:var(--lav); color:var(--lav-ink) }
+.icon-btn { width:34px; height:34px; display:inline-grid; place-items:center; border-radius:10px; border:0; background:none; cursor:pointer; color:var(--brand-text) }
+.icon-btn:hover { background:var(--brand-soft) } .icon-btn svg { width:19px; height:19px; stroke:currentColor; fill:none; stroke-width:1.9; stroke-linecap:round; stroke-linejoin:round }
+.acoes-lista { list-style:none; margin:0; padding:0 }
+.acoes-lista li a { display:flex; align-items:center; gap:12px; padding:12px 4px; border-bottom:1px solid var(--line); color:var(--ink); text-decoration:none }
+.acoes-lista li:last-child a { border-bottom:0 }
+.acoes-lista a:hover b { color:var(--brand-text) }
+.ponto { width:12px; height:12px; border-radius:50%; flex:none }
+.acoes-lista .seta { margin-left:auto; color:var(--muted) }
+.rapidas { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px }
+.rapidas .btn { padding:14px 12px }
+.vazio { color:var(--muted); font-style:italic; margin:6px 0 }
+.mais { margin-top:10px; text-align:right } .mais a { color:var(--brand-text); font-weight:700; text-decoration:none }
+/* formulário */
+form.pag { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px 16px }
+form.pag label { display:flex; flex-direction:column; gap:5px; font:700 13px var(--display); color:var(--muted) }
+form.pag input, form.pag select { padding:10px 12px; border-radius:10px; border:1px solid var(--line); background:var(--bg); font-weight:400 }
+form.pag input:focus, form.pag select:focus { outline:2px solid var(--brand); outline-offset:0 }
+form.pag .cheio { grid-column:1/-1 } .form-fim { display:flex; gap:12px; align-items:center; flex-wrap:wrap }
+.msg { font-weight:700 } .msg.ok { color:var(--mint-ink) } .msg.erro { color:var(--blush-ink) }
+.planos { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:16px }
+.plano { border-radius:var(--r); padding:18px; border:1px solid var(--line); background:var(--surface) }
+.plano h3 { margin:0; font:800 18px var(--display) } .plano .num { font:800 34px/1.2 var(--display) }
+.plano p { margin:4px 0 0; color:var(--muted); font-size:13px }
+.barra { display:flex; height:14px; border-radius:99px; overflow:hidden; gap:2px; margin:4px 0 14px }
+.legenda { display:flex; flex-wrap:wrap; gap:8px 18px; list-style:none; margin:0; padding:0; font-size:14px }
+.legenda i { display:inline-block; width:10px; height:10px; border-radius:3px; margin-right:6px }
+.regras { margin:0; padding-left:18px; color:var(--muted) } .regras li { margin:4px 0 }
+svg.grafico { width:100%; height:auto; display:block }
+.view[hidden] { display:none !important }
+/* celular */
+@media (max-width: 1100px) { .grade { grid-template-columns:1fr } .kpis { grid-template-columns:repeat(2,minmax(0,1fr)) } .planos { grid-template-columns:repeat(2,minmax(0,1fr)) } }
+@media (max-width: 820px) {
+  .app { grid-template-columns:minmax(0,1fr) }   /* sem o minmax, a barra do menu deixava a página mais larga que o celular */
+  aside { min-width:0; position:static; height:auto; flex-direction:row; flex-wrap:wrap; align-items:center; gap:10px;
+          padding:12px max(16px, env(safe-area-inset-right, 0px)) 12px max(16px, env(safe-area-inset-left, 0px)) }
+  .logo { width:56px; height:56px; margin:0 } nav { flex-direction:row; overflow-x:auto; flex:1 1 100%; order:3 }
+  nav a { padding:8px 12px; white-space:nowrap } nav a span { display:inline }
+  .side-cta { margin:0 0 0 auto; width:auto } .btn-side { width:auto; padding:10px 14px }
+  main { padding:18px max(16px, env(safe-area-inset-right, 0px)) 48px max(16px, env(safe-area-inset-left, 0px)) }
+  .rapidas { grid-template-columns:repeat(2,minmax(0,1fr)) } form.pag { grid-template-columns:1fr } }
+@media (max-width: 480px) { .kpis, .planos { grid-template-columns:1fr } .topo h1 { font-size:25px } }
+@media (prefers-reduced-motion: reduce) { * { transition:none !important } }
+
+.entrar { position:fixed; inset:0; z-index:50; display:grid; place-items:center; padding:16px; background:linear-gradient(160deg,var(--side-a),var(--side-b)) }
+.entrar form { width:min(380px,100%); background:var(--surface); color:var(--ink); border-radius:20px; padding:28px 24px; display:grid; gap:12px; box-shadow:0 20px 60px rgba(0,0,0,.35) }
+.entrar img { width:110px; height:110px; border-radius:50%; margin:0 auto 4px; display:block }
+.entrar h1 { margin:0; text-align:center; font:800 24px var(--display) }
+.entrar label { display:grid; gap:5px; font:700 13px var(--display); color:var(--muted) }
+.entrar input { padding:11px 12px; border-radius:10px; border:1px solid var(--line); background:var(--bg); color:var(--ink); font:inherit }
+.entrar .msg { min-height:1.2em; text-align:center }
+body { margin:0 }
+[hidden] { display:none !important }   /* a tela de entrar some depois do login */
+/* finanças */
+.fin-topo { display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:16px }
+.fin-mes { display:flex; align-items:center; gap:8px; font:700 14px var(--display); color:var(--muted); margin-right:auto }
+.fin-mes select, .fin-sel { padding:9px 12px; border-radius:10px; border:1px solid var(--line); background:var(--surface); font-weight:700 }
+.fin-sel { padding:6px 8px; font-weight:400; max-width:190px; background:var(--bg) }
+.fin-caixa { margin-bottom:20px }
+.fin-kpis .kpi { display:flex; flex-direction:column; align-items:flex-start; gap:2px }
+.fin-kpis .kpi .num { font-size:28px }
+.fin-ext-op { margin-bottom:12px }
+.fin-drop { display:flex; flex-direction:column; align-items:center; gap:4px; padding:26px 16px; border:2px dashed var(--line); border-radius:14px;
+            cursor:pointer; text-align:center; color:var(--muted); background:var(--bg) }
+.fin-drop b { color:var(--ink); font:800 16px var(--display) }
+.fin-drop.em-cima, .fin-drop:hover { border-color:var(--brand); background:var(--brand-soft) }
+.v-ent { color:var(--mint-ink); font-weight:700; white-space:nowrap } .v-sai { color:var(--blush-ink); font-weight:700; white-space:nowrap }
+tr.fin-nao td { opacity:.5 }
+.fin-meta { margin:0 0 16px } .fin-meta:last-child { margin-bottom:0 }
+.fin-meta .rotulo { display:flex; justify-content:space-between; gap:8px; font:700 14px var(--display) }
+.fin-trilho { height:12px; border-radius:99px; background:var(--gray); overflow:hidden; margin:6px 0 4px }
+.fin-trilho i { display:block; height:100%; border-radius:99px; background:var(--brand) }
+.fin-trilho i.ok { background:var(--mint-ink) } .fin-trilho i.ruim { background:var(--blush-ink) }
+.fin-cat { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:2px 10px; margin-bottom:10px; font-size:14px }
+.fin-cat .fin-trilho { grid-column:1/-1; height:8px; margin:0 }
+.fin-valor-in { width:92px; padding:6px 8px; border-radius:8px; border:1px solid var(--line); background:var(--bg) }
+.fin-sub-tit { font:800 13px var(--display); color:var(--muted); margin:14px 0 8px; text-transform:uppercase; letter-spacing:.04em }
+.fin-sub-tit:first-child { margin-top:0 }
+</style>
+
+
+<div class="entrar" id="tela-entrar" hidden><form id="form-entrar">
+  <img src="data:image/jpeg;base64,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" alt="Mascatinho Papel com Amor"><h1>Mascatinho Hub</h1>
+  <label>E-mail<input id="e-email" type="email" autocomplete="username" required></label>
+  <label>Senha<input id="e-senha" type="password" autocomplete="current-password" required></label>
+  <button class="btn btn-brand" type="submit" id="e-botao">Entrar</button><p class="msg" id="e-msg" role="status"></p>
+</form></div>
+<div class="app">
+<aside>
+  <img class="logo" alt="Mascatinho Papel com Amor" src="data:image/jpeg;base64,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">
+  <nav id="menu" aria-label="Menu">
+    <a href="#painel" data-v="painel"><svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/></svg><span>Painel</span></a>
+    <a href="#clientes" data-v="clientes"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5"/><circle cx="17" cy="9" r="2.6"/><path d="M16 14.6c2.6-.3 4.8 1.4 5.5 4.4"/></svg><span>Clientes</span></a>
+    <a href="#antigos" data-v="antigos"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg><span>Clientes antigas</span></a>
+    <a href="#pagamentos" data-v="pagamentos"><svg viewBox="0 0 24 24"><rect x="2.5" y="5" width="19" height="14" rx="2.5"/><path d="M2.5 10h19"/><path d="M6.5 15h4"/></svg><span>Pagamentos</span></a>
+    <a href="#planos" data-v="planos"><svg viewBox="0 0 24 24"><path d="M12 3l9 5-9 5-9-5 9-5z"/><path d="M3 13l9 5 9-5"/></svg><span>Planos</span></a>
+    <a href="#grupo" data-v="grupo"><svg viewBox="0 0 24 24"><path d="M21 4L3 11l6 2.2L18 7l-7 7.4V20l3.4-3.6L18 19z"/></svg><span>Grupo</span></a>
+    <a href="#cobranca" data-v="cobranca"><svg viewBox="0 0 24 24"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 8 3 8H3s3-1 3-8"/><path d="M10 20a2 2 0 0 0 4 0"/></svg><span>Cobrança</span></a>
+    <a href="#relatorios" data-v="relatorios"><svg viewBox="0 0 24 24"><path d="M4 20V10"/><path d="M10 20V4"/><path d="M16 20v-7"/><path d="M21 20H3"/></svg><span>Relatórios</span></a>
+    <a href="#financas" data-v="financas"><svg viewBox="0 0 24 24"><path d="M4 7.5h14.5a2 2 0 0 1 2 2V18a2 2 0 0 1-2 2H5.5a2 2 0 0 1-2-2V6.5a2 2 0 0 1 2-2H16"/><path d="M16 13.8h.01"/><path d="M20.5 11h-4a2.8 2.8 0 0 0 0 5.6h4"/></svg><span>Finanças</span></a>
+  </nav>
+  <div class="side-cta"><a class="btn btn-side" href="#pagamentos" data-novo="1"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Registrar pagamento</a></div>
+</aside>
+
+<main>
+  <div class="topo">
+    <div class="titulo"><h1 id="titulo">Painel</h1><p id="ola">Aqui está o resumo do seu clube.</p></div>
+    <label class="busca"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+      <input id="busca" type="search" placeholder="Buscar cliente…" aria-label="Buscar cliente"></label>
+    <span class="fresco" id="fresco">Carregando…</span>
+  </div>
+  <div class="aviso" id="aviso" hidden></div>
+
+  <!-- PAINEL -->
+  <section class="view" data-view="painel">
+    <div class="kpis">
+      <div class="kpi k-mint"><div class="ic"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5"/><circle cx="17" cy="9" r="2.6"/><path d="M16 14.6c2.6-.3 4.8 1.4 5.5 4.4"/></svg></div>
+        <div class="rot">Clientes ativos</div><div class="linha"><span class="num" id="k-ativos">—</span><span class="sub" id="k-ativos-sub"></span></div></div>
+      <div class="kpi k-lav"><div class="ic"><svg viewBox="0 0 24 24"><path d="M9 3h6l-1.5 3h-3z"/><path d="M8.5 6.5C5 9 4 12 4 15c0 3.5 3 6 8 6s8-2.5 8-6c0-3-1-6-4.5-8.5z"/><path d="M14 11.5c-.4-.9-1.2-1.3-2-1.3-1.2 0-2 .7-2 1.6 0 2.2 4 1.2 4 3.4 0 .9-.9 1.6-2 1.6-.9 0-1.7-.4-2.1-1.3M12 9v1.2M12 16.8V18"/></svg></div>
+        <div class="rot" id="k-receita-rot">Receita do mês</div><div class="linha"><span class="num" id="k-receita">—</span><span class="sub" id="k-receita-sub"></span></div></div>
+      <div class="kpi k-butter"><div class="ic"><svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg></div>
+        <div class="rot" id="k-venc-rot">Próximo vencimento</div><div class="linha"><span class="num" id="k-vencendo">—</span><a href="#clientes" data-filtro="vencendo">Ver lista →</a></div>
+        <ul class="k-venc" id="k-venc-lista"></ul></div>
+      <div class="kpi k-blush"><div class="ic"><svg viewBox="0 0 24 24"><path d="M12 3.5l9.5 16.5h-19z"/><path d="M12 10v4.5M12 17.2v.3"/></svg></div>
+        <div class="rot">Em atraso</div><div class="linha"><span class="num" id="k-atraso">—</span><a href="#clientes" data-filtro="atraso">Ver lista →</a></div></div>
+    </div>
+    <div class="grade">
+      <div class="col">
+        <div class="cartao">
+          <h2><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5"/><circle cx="17" cy="9" r="2.6"/><path d="M16 14.6c2.6-.3 4.8 1.4 5.5 4.4"/></svg>Precisam de atenção
+            <a class="btn btn-brand dir" href="#pagamentos" data-novo="1"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Registrar pagamento</a></h2>
+          <div class="tabs" role="tablist" id="tabs-painel"></div>
+          <div class="rolar" id="tabela-painel"></div>
+          <div class="mais"><a href="#clientes">Ver todos os clientes →</a></div>
+        </div>
+        <div class="cartao">
+          <h2><svg viewBox="0 0 24 24"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></svg>Ações rápidas</h2>
+          <div class="rapidas">
+            <a class="btn btn-ghost" href="#pagamentos" data-novo="1"><svg viewBox="0 0 24 24"><rect x="2.5" y="5" width="19" height="14" rx="2.5"/><path d="M2.5 10h19"/></svg>Registrar pagamento</a>
+            <a class="btn btn-ghost" href="#novo"><svg viewBox="0 0 24 24"><circle cx="10" cy="8" r="3.5"/><path d="M3.5 20c.8-3.6 3.4-5.5 6.5-5.5 1.4 0 2.7.4 3.8 1.1"/><path d="M18 14v6M15 17h6"/></svg>Novo cliente</a>
+            <a class="btn btn-ghost" href="#clientes" data-filtro="conferir"><svg viewBox="0 0 24 24"><path d="M9 11l2.5 2.5L16 9"/><rect x="3.5" y="3.5" width="17" height="17" rx="3"/></svg>Conferir pendências</a>
+            <a class="btn btn-ghost" href="#relatorios"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M21 20H3"/></svg>Ver relatórios</a>
+          </div>
+        </div>
+      </div>
+      <div class="col">
+        <div class="cartao"><h2><svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>Próximas ações</h2>
+          <ul class="acoes-lista" id="proximas"></ul></div>
+        <div class="cartao"><h2><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M21 20H3"/></svg>Receita mensal</h2>
+          <div id="grafico-mini"></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CLIENTES -->
+  <section class="view" data-view="clientes" hidden>
+    <div class="cartao">
+      <h2><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5"/></svg>Clientes do mês <span class="sub" id="mes-txt"></span>
+        <a class="btn btn-brand dir" href="#novo"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Novo cliente</a></h2>
+      <p class="explica">Só os seus clientes (Elo7) da lista do mês vigente. Os do esposo (RF/RFB) não entram. O pagamento confirmado vale antes da planilha.</p>
+      <div class="tabs" role="tablist" id="tabs-clientes"></div>
+      <div class="rolar" id="tabela-clientes"></div>
+    </div>
+  </section>
+
+  <!-- CLIENTES ANTIGAS (04/11) -->
+  <section class="view" data-view="antigos" hidden>
+    <div class="cartao">
+      <h2><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>Clientes antigas <span class="sub" id="ant-quando"></span></h2>
+      <p class="explica">Todo mundo que já foi sua cliente, desde a primeira (planilha de 2024, 2025 e 2026 + o banco). Só as suas: as do esposo não entram.
+        Quem volta ao grupo é reconhecida sozinha como <b>retorno</b>. O botão <b>Chamar</b> abre o WhatsApp com a proposta de resgate pronta — você confere e envia.</p>
+      <div id="ant-resumo" class="legenda" style="margin:8px 0 12px"></div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px">
+        <input id="ant-busca" type="search" placeholder="Buscar pelo nome…" style="flex:1 1 200px;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:inherit">
+        <select id="ant-sit" style="padding:10px;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:inherit">
+          <option value="saiu">Saíram</option><option value="ativa">Ativas hoje</option><option value="">Todas</option></select>
+        <select id="ant-tempo" style="padding:10px;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:inherit">
+          <option value="">Fora há qualquer tempo</option><option value="0-1">Saiu há até 1 mês</option><option value="2-3">Há 2 a 3 meses</option>
+          <option value="4-6">Há 4 a 6 meses</option><option value="7-12">Há 7 a 12 meses</option><option value="13-999">Há mais de 1 ano</option></select>
+        <label style="display:flex;align-items:center;gap:6px"><input id="ant-tel" type="checkbox"> só com WhatsApp</label>
+      </div>
+      <div class="rolar" id="ant-tabela"><p class="vazio">Carregando…</p></div>
+    </div>
+  </section>
+
+  <!-- NOVO CLIENTE -->
+  <section class="view" data-view="novo" hidden>
+    <div class="grade">
+      <div class="cartao" id="cartao-novo">
+        <h2><svg viewBox="0 0 24 24"><circle cx="10" cy="8" r="3.5"/><path d="M3.5 20c.8-3.6 3.4-5.5 6.5-5.5 1.4 0 2.7.4 3.8 1.1"/><path d="M18 14v6M15 17h6"/></svg>Cadastrar cliente</h2>
+        <p class="explica">A cliente entra na base na hora: lista do mês, cobrança, grupo e planilha. Cliente <b>nova</b> paga R$ 10,00 no 1º mês e depois o valor normal do plano. Cliente de <b>retorno</b> paga o valor normal.</p>
+        <form class="pag" id="form-novo" autocomplete="off">
+          <label class="cheio">Nome da cliente<input id="n-nome" required placeholder="Como vai aparecer na planilha"></label>
+          <p class="cheio sub" id="n-dica" role="status"></p>
+          <label>@ do Telegram (se tiver)<input id="n-arroba" placeholder="@usuario"></label>
+          <label>Telefone (se tiver)<input id="n-tel" inputmode="tel" placeholder="(11) 98888-7777"></label>
+          <label>Tipo de cliente<select id="n-tipo"><option value="nova">Nova — 1º mês R$ 10,00</option><option value="retorno">Retorno — valor normal</option></select></label>
+          <label>Plano<select id="n-plano"><option value="mensal">Mensal</option><option value="trimestral">Trimestral</option><option value="semestral">Semestral</option><option value="anual">Anual</option></select></label>
+          <label>Valor pago agora (R$)<input id="n-valor" type="number" min="0" step="0.01" inputmode="decimal"></label>
+          <label>Data de entrada<input id="n-entrada" type="date" required></label>
+          <label>Data do pagamento<input id="n-pagou" type="date"></label>
+          <div class="cheio cartao" style="background:var(--bg)" id="n-resumo" aria-live="polite"></div>
+          <div class="cheio form-fim"><button class="btn btn-brand" id="n-enviar" type="submit">Cadastrar cliente</button><span class="msg" id="n-msg" role="status"></span></div>
+        </form>
+      </div>
+      <div class="cartao"><h2>Cadastradas aqui</h2>
+        <p class="explica">Já contam no painel. O Claude leva para o computador (cobrança, grupo e planilha) quando você pedir “atualize o painel”.</p>
+        <div id="lista-novos"></div></div>
+    </div>
+  </section>
+
+  <!-- PAGAMENTOS -->
+  <section class="view" data-view="pagamentos" hidden>
+    <div class="grade">
+      <div class="col">
+        <div class="cartao" id="cartao-form">
+          <h2><svg viewBox="0 0 24 24"><rect x="2.5" y="5" width="19" height="14" rx="2.5"/><path d="M2.5 10h19"/><path d="M6.5 15h4"/></svg>Registrar pagamento</h2>
+          <p class="explica">Use quando o pagamento chegar no WhatsApp. A cliente passa a contar como paga na hora, com o vencimento novo no mesmo dia do pagamento. Depois o Claude leva isso para a planilha.</p>
+          <form class="pag" id="form-pag" autocomplete="off">
+            <label class="cheio">Cliente<input id="f-nome" list="lista-nomes" required placeholder="Comece a digitar o nome…"></label>
+            <datalist id="lista-nomes"></datalist>
+            <label>Pacote<select id="f-plano"><option value="mensal">Mensal</option><option value="trimestral">Trimestral</option><option value="semestral">Semestral</option><option value="anual">Anual</option></select></label>
+            <label>Data do pagamento<input id="f-data" type="date" required></label>
+            <label>Valor (R$)<input id="f-valor" type="number" min="0" step="0.01" inputmode="decimal" placeholder="ex.: 30"></label>
+            <label>Observação<input id="f-obs" placeholder="ex.: comprovante Pix no WhatsApp"></label>
+            <div class="cheio form-fim"><button class="btn btn-brand" id="f-enviar" type="submit">Registrar como pago</button><span class="msg" id="f-msg" role="status"></span></div>
+          </form>
+        </div>
+      </div>
+      <div class="col">
+        <div class="cartao"><h2><svg viewBox="0 0 24 24"><path d="M21 4L3 11l6 2.2L18 7l-7 7.4V20l3.4-3.6L18 19z"/></svg>Comprovantes para conferir</h2>
+          <p class="explica">Chegaram no WhatsApp, mas o leitor não teve certeza. Toque em <b>Conferir</b>: o pagamento já vem preenchido, é só confirmar a cliente e registrar.</p>
+          <div id="lista-conferir"></div></div>
+        <div class="cartao"><h2><svg viewBox="0 0 24 24"><path d="M12 8v4l3 2"/><circle cx="12" cy="12" r="9"/></svg>Registrados aqui</h2>
+          <p class="explica">Esperando o Claude levar para o computador e para a planilha.</p>
+          <div id="lista-online"></div></div>
+        <div class="cartao"><h2><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg>Faltam lançar na planilha</h2>
+          <p class="explica">Já contam como pagos. Falta só a linha na planilha.</p>
+          <div id="lista-lancar"></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PLANOS -->
+  <section class="view" data-view="planos" hidden>
+    <div class="planos" id="planos"></div>
+    <div class="cartao" style="margin-top:20px"><h2>Como a validade é calculada</h2>
+      <ul class="regras">
+        <li>O vencimento é no <b>mesmo dia do pagamento</b>: 1 mês (mensal), 3 (trimestral), 6 (semestral) ou 12 (anual) depois.</li>
+        <li>Pacote vigente <b>nunca</b> é inadimplente. Fundo <b>bege</b> na planilha = pacote ativo.</li>
+        <li>Cor da letra na planilha = pacote: <b>rosa</b> anual · <b>azul</b> trimestral · <b>laranja</b> semestral.</li>
+        <li><b>Vencendo</b> = nos próximos 7 dias · <b>Vencido</b> = há até 5 dias · <b>Atrasado</b> = há mais de 5 dias.</li>
+      </ul></div>
+  </section>
+
+  <!-- GRUPO -->
+  <section class="view" data-view="grupo" hidden>
+    <div class="cartao"><h2><svg viewBox="0 0 24 24"><path d="M21 4L3 11l6 2.2L18 7l-7 7.4V20l3.4-3.6L18 19z"/></svg>Quem é quem no grupo</h2>
+      <p class="explica" id="grupo-info"></p><div class="barra" id="barra-quem"></div><ul class="legenda" id="legenda-quem"></ul></div>
+    <div class="col" style="margin-top:20px" id="listas-grupo"></div>
+  </section>
+
+  <!-- COBRANÇA -->
+  <section class="view" data-view="cobranca" hidden>
+    <div class="aviso" id="cob-modo"></div>
+    <div class="grade">
+      <div class="col" id="cob-listas"></div>
+      <div class="col">
+        <div class="cartao"><h2>Como funciona</h2><ul class="regras">
+          <li><b>D-3</b>: lembrete 3 dias antes do vencimento.</li>
+          <li><b>D0</b>: lembrete no dia do vencimento.</li>
+          <li><b>D+1</b>: sai do grupo se não pagou nem avisou atraso.</li>
+          <li>Nunca sai: pacote vigente, fundo bege, quem pagou, comprovante esperando você, quem avisou atraso, cliente do esposo ou nome sem certeza.</li>
+          <li>Freio: se mais de 15 sairiam no mesmo dia, ninguém sai e você recebe um aviso.</li></ul></div>
+        <div class="cartao"><h2>Textos dos lembretes</h2><div id="cob-textos"></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- RELATÓRIOS -->
+  <section class="view" data-view="relatorios" hidden>
+    <div class="grade">
+      <div class="cartao"><h2>Receita mensal</h2><p class="explica">Soma da coluna VALOR de cada mês da planilha.</p><div id="grafico-grande"></div></div>
+      <div class="cartao"><h2>Situação dos clientes</h2><ul class="legenda" id="rel-sit" style="flex-direction:column"></ul></div>
+      <div class="cartao"><h2>Planilha do mês</h2><p class="explica">No mesmo padrão da sua planilha (cores e colunas). O robô refaz a cada 15 minutos;
+        a de cada mês também fica no PC em ROBÔ › MEUS ARQUIVOS › CLIENTES › PLANILHAS DO MÊS.</p>
+        <button class="btn btn-brand" type="button" id="baixar-planilha">Baixar planilha do mês</button> <span class="sub" id="planilha-info"></span></div>
+    </div>
+  </section>
+
+  <!-- FINANÇAS (escopo aprovado por ela em 04/11/2026) -->
+  <section class="view" data-view="financas" hidden>
+    <div class="aviso" id="fin-aviso" hidden></div>
+    <div class="fin-topo">
+      <label class="fin-mes">Mês <select id="fin-mes" aria-label="Escolher o mês"></select></label>
+      <button class="btn btn-brand" type="button" data-fin-abrir="lancar"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Lançar</button>
+      <button class="btn btn-ghost" type="button" data-fin-abrir="extrato"><svg viewBox="0 0 24 24"><path d="M12 4v11M7 10l5 5 5-5"/><path d="M4 19h16"/></svg>Arrastar extrato</button>
+      <button class="btn btn-ghost" type="button" data-fin-abrir="fixa"><svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>Nova conta fixa</button>
+    </div>
+
+    <div class="cartao fin-caixa" id="fin-caixa-lancar" hidden>
+      <h2>Lançar entrada ou saída</h2>
+      <form class="pag" id="fin-form-lanc">
+        <label>Entrada ou saída<select id="fl-sentido"><option value="saida">Saída (gastei)</option><option value="entrada">Entrada (recebi)</option></select></label>
+        <label>Tipo<select id="fl-cat"></select></label>
+        <label class="cheio">O que foi<input id="fl-desc" required maxlength="120" placeholder="Ex.: Luz de novembro, venda Artesanou, mercado…"></label>
+        <label>Valor (R$)<input id="fl-valor" required inputmode="decimal" placeholder="0,00"></label>
+        <label>Dia<input id="fl-data" type="date" required></label>
+        <div class="cheio form-fim"><button class="btn btn-brand" type="submit" id="fl-enviar">Salvar</button>
+          <button class="btn btn-ghost" type="button" data-fin-fechar="1">Cancelar</button><span class="msg" id="fl-msg" role="status"></span></div>
+      </form>
+    </div>
+
+    <div class="cartao fin-caixa" id="fin-caixa-fixa" hidden>
+      <h2>Nova conta fixa</h2>
+      <p class="explica">Cadastre uma vez. Todo mês ela aparece sozinha e você só clica em <b>Paguei</b>.</p>
+      <form class="pag" id="fin-form-fixa">
+        <label class="cheio">Nome da conta<input id="ff-nome" required maxlength="60" placeholder="Ex.: Academia, Luz, Internet, Canva…"></label>
+        <label>Valor de sempre (R$)<input id="ff-valor" required inputmode="decimal" placeholder="0,00"></label>
+        <label>Vence todo dia<input id="ff-dia" type="number" min="1" max="31" required placeholder="10"></label>
+        <label>Tipo<select id="ff-cat"></select></label>
+        <div class="cheio form-fim"><button class="btn btn-brand" type="submit" id="ff-enviar">Cadastrar</button>
+          <button class="btn btn-ghost" type="button" data-fin-fechar="1">Cancelar</button><span class="msg" id="ff-msg" role="status"></span></div>
+      </form>
+    </div>
+
+    <div class="cartao fin-caixa" id="fin-caixa-extrato" hidden>
+      <h2>Arrastar extrato</h2>
+      <p class="explica">Baixe o extrato no app do banco (de preferência em <b>Excel</b>, <b>CSV</b> ou <b>OFX</b>) e arraste aqui.
+        O painel separa tudo sozinho e mostra antes de salvar: você confere e muda o que quiser. O que já foi lançado não entra duas vezes.</p>
+      <div class="pag fin-ext-op">
+        <label>De onde é<select id="fx-fonte"><option value="mp">Extrato da conta Mercado Pago</option><option value="nubank">Extrato da conta Nubank</option>
+          <option value="fatura_mp">Fatura do cartão Mercado Pago (cada compra)</option><option value="fatura_nubank">Fatura do cartão Nubank (cada compra)</option>
+          <option value="outro">Outro banco</option></select></label>
+        <label id="fx-mes-rot" hidden>A fatura é do mês<select id="fx-mes"></select></label>
+      </div>
+      <label class="fin-drop" id="fx-drop"><input type="file" id="fx-arquivo" accept=".csv,.txt,.xlsx,.xls,.ofx,.pdf" hidden>
+        <b>Arraste o arquivo aqui</b><span>ou toque para escolher</span></label>
+      <p class="msg" id="fx-msg" role="status"></p>
+      <div id="fx-previa"></div>
+    </div>
+
+    <div class="kpis fin-kpis" id="fin-kpis"></div>
+    <div class="grade">
+      <div class="col">
+        <div class="cartao" id="fin-avisos-cartao" hidden><h2><svg viewBox="0 0 24 24"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 8 3 8H3s3-1 3-8"/><path d="M10 20a2 2 0 0 0 4 0"/></svg>Contas para pagar logo</h2>
+          <ul class="acoes-lista" id="fin-avisos"></ul></div>
+        <div class="cartao"><h2>Entradas e saídas do mês</h2>
+          <div class="tabs" role="tablist" id="fin-tabs"></div>
+          <div class="rolar" id="fin-lancs"></div></div>
+        <div class="cartao"><h2>Contas fixas do mês</h2>
+          <p class="explica">Aparecem sozinhas todo mês. Se o valor veio diferente, mude antes de clicar em <b>Paguei</b>.</p>
+          <div class="rolar" id="fin-fixas"></div></div>
+        <div class="cartao"><h2>Meses antigos</h2>
+          <p class="explica">Em quanto cada mês fechou. Antes de novembro/2026 só tem a receita do clube (da planilha).
+            O robô da nuvem guarda o fechamento todo dia 1.</p>
+          <div class="rolar" id="fin-meses"></div></div>
+      </div>
+      <div class="col">
+        <div class="cartao"><h2>Metas do mês <button class="btn btn-ghost dir" type="button" data-fin-abrir="metas">Mudar</button></h2>
+          <div id="fin-metas"></div>
+          <form class="pag" id="fin-form-metas" hidden>
+            <label class="cheio">Faturar no mínimo (R$)<input id="fm-faturar" inputmode="decimal" placeholder="0,00"></label>
+            <label class="cheio">Gastar no máximo (R$)<input id="fm-gastar" inputmode="decimal" placeholder="0,00"></label>
+            <label class="cheio">Guardar por mês (R$)<input id="fm-guardar" inputmode="decimal" placeholder="0,00"></label>
+            <div class="cheio form-fim"><button class="btn btn-brand" type="submit" id="fm-enviar">Salvar metas</button><span class="msg" id="fm-msg" role="status"></span></div>
+          </form></div>
+        <div class="cartao"><h2>Por tipo</h2><div id="fin-cats"></div></div>
+        <div class="cartao"><h2>Clube no mês</h2><div id="fin-clube"></div></div>
+      </div>
+    </div>
+  </section>
+</main>
+</div>
+
+<script>
+(function () {
+  "use strict";
+  var MESES_PLANO = { mensal: 1, trimestral: 3, semestral: 6, anual: 12 };
+  var SIT = {
+    "em dia": ["Em dia", "s-ok"], "vencendo": ["Vencendo", "s-venc"], "vencido": ["Vencido", "s-vencido"],
+    "atrasado": ["Atrasado", "s-atraso"], "saiu do grupo": ["Saiu do grupo", "s-saiu"], "precisa conferir": ["Conferir", "s-conf"]
+  };
+  var AV = ["k-mint", "k-lav", "k-butter", "k-blush"];
+  var TITULOS = { painel: "Painel", clientes: "Clientes", antigos: "Clientes antigas", pagamentos: "Pagamentos", planos: "Planos", cobranca: "Cobrança", novo: "Novo cliente", grupo: "Grupo do Telegram", relatorios: "Relatórios", financas: "Finanças" };
+  var state = { base: null, pags: [], novos: [], avisosM: [], remocoes: [], podeEscrever: false, filtroClientes: "todos", filtroPainel: "atencao", busca: "", db: null, nome: "",
+    fin: { ok: null, linhas: [], clube: null, mes: "", filtro: "tudo", previa: null } };
+
+  function el(id) { return document.getElementById(id); }
+  function esc(t) { return String(t == null ? "" : t).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+  function semAcento(t) { return String(t || "").normalize("NFD").replace(/[̀-ͯ]/g, ""); }
+  var RUIDO = { elo7: 1, elo: 1, rf: 1, rfb: 1, telegram: 1, telegran: 1, anual: 1, semestral: 1, trimestral: 1, mensal: 1, autom: 1, dra: 1, dr: 1, e: 1, de: 1, da: 1, "do": 1, dos: 1, das: 1 };
+  function normal(t) {
+    t = semAcento(t).toLowerCase().replace(/@[a-z0-9_]+/g, " ").replace(/\belo\s*7\b/g, " ").replace(/[^a-z0-9 ]+/g, " ").replace(/^\s*\d+\s+/, " ");
+    return t.split(/\s+/).filter(function (p) { return p && !RUIDO[p] && !/^\d+$/.test(p); }).join(" ");
+  }
+  function hoje() { var d = new Date(); return new Date(d.getFullYear(), d.getMonth(), d.getDate()); }
+  function parse(iso) { if (!iso) return null; var p = iso.split("-"); return new Date(+p[0], +p[1] - 1, +(p[2] || 1)); }
+  // até 30/11/2026: pagou até o dia 15 vence no dia 10, do dia 16 em diante vence no dia 20; depois, mesmo dia do pagamento
+  function somarMeses(d, n) { var y = d.getFullYear(), m = d.getMonth() + n;
+    if (d <= new Date(2026, 10, 30)) return new Date(y, m, d.getDate() <= 15 ? 10 : 20);
+    var ult = new Date(y, m + 1, 0).getDate(); return new Date(y, m, Math.min(d.getDate(), ult)); }
+  // 05/11 (regra dela): pagou antes do vencimento (ou no dia) mantém o dia; pagou atrasado conta do dia do pagamento
+  function proxVenc(d, n, antes) {
+    if (antes && d <= antes) { var y = antes.getFullYear(), m = antes.getMonth() + n, ult = new Date(y, m + 1, 0).getDate(); return new Date(y, m, Math.min(antes.getDate(), ult)); }
+    return somarMeses(d, n); }
+  function fmt(d) { return d ? ("0" + d.getDate()).slice(-2) + "/" + ("0" + (d.getMonth() + 1)).slice(-2) + "/" + d.getFullYear() : "—"; }
+  function reais(v) { return v ? v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" }) : "—"; }
+  function iniciais(n) { var p = semAcento(n).replace(/[^A-Za-z ]/g, " ").trim().split(/\s+/); return ((p[0] || "?")[0] + (p.length > 1 ? p[p.length - 1][0] : "")).toUpperCase(); }
+  function cap(t) { return t ? t[0].toUpperCase() + t.slice(1) : ""; }
+
+  function situacao(venc) {
+    if (!venc) return ["precisa conferir", null];
+    var dias = Math.round((hoje() - venc) / 864e5);
+    if (dias <= -8) return ["em dia", dias];
+    if (dias <= 0) return ["vencendo", dias];
+    if (dias <= 5) return ["vencido", dias];
+    return ["atrasado", dias];
+  }
+  function diasTxt(c) {
+    var d = c.dias; if (d == null) return "";
+    if (d > 0) return "venceu há " + d + " dia" + (d > 1 ? "s" : "");
+    if (d === 0) return "vence hoje";
+    return "faltam " + (-d) + " dia" + (d < -1 ? "s" : "");
+  }
+
+  // monta a lista do mês: base da planilha + pagamentos registrados aqui (estes valem primeiro)
+  function clientes() {
+    if (!state.base) return [];
+    var lista = state.base.clientes.map(function (c) {
+      var o = Object.assign({}, c);
+      o.vence = parse(c.vence); o.pagou = parse(c.pagou);
+      if (c.sit === "saiu do grupo" || (c.sit === "precisa conferir" && c.cor !== "whatsapp")) { o.s = c.sit; o.dias = null; }
+      else { var s = situacao(o.vence); o.s = s[0]; o.dias = s[1]; if (c.cor === "bege" && (o.s === "vencido" || o.s === "atrasado")) o.s = "precisa conferir"; }
+      o.lancar = !!c.confirmado; o.online = null;
+      return o;
+    });
+    var porK = {}; lista.forEach(function (c) { porK[c.k] = c; });
+    state.novos.forEach(function (nv) {
+      if (porK[nv.k]) return;                       // já veio do computador
+      var pg = parse(nv.data_pagamento), ve = parse(nv.vencimento);
+      var c = { k: nv.k, nome: nv.nome, plano: nv.periodo, valor: nv.valor || 0, pagou: pg, vence: ve, conferir: nv.conferir || [],
+        grupo: null, cor: "manual", lancar: true, novo: nv.tipo === "nova", manual: { tipo: nv.tipo, plano: nv.plano } };
+      if (nv.status === "pago" || (pg && ve)) { var s = situacao(ve); c.s = s[0]; c.dias = s[1]; } else { c.s = "precisa conferir"; c.dias = null; }
+      if ((nv.conferir || []).length && c.s === "em dia") c.s = "em dia";
+      lista.push(c); porK[c.k] = c;
+    });
+    state.pags.forEach(function (p) {
+      var c = porK[p.k];
+      if (!c) { c = { k: p.k, nome: p.nome, conferir: [], grupo: null, cor: "", novo: true }; lista.push(c); porK[p.k] = c; }
+      var d = parse(p.data);
+      if (c.pagou && d && c.pagou >= d && !c.online && c.s !== "saiu do grupo") return;
+      c.plano = p.plano; c.pagou = d; c.valor = p.valor || 0; c.vence = d ? proxVenc(d, MESES_PLANO[p.plano], c.vence) : null;
+      var s = situacao(c.vence); c.s = s[0]; c.dias = s[1]; c.pacote_ok = !!(c.vence && c.vence >= hoje());
+      c.lancar = true; c.online = p; c.conferir = [];
+    });
+    var avM = {}; state.avisosM.forEach(function (a) { avM[a.k] = a; });
+    lista.forEach(function (c) {
+      var a = avM[c.k];
+      if (a && a.acao === "remover") c.aviso = null;
+      else if (a) c.aviso = { data: a.data, texto: a.obs || "marcado no painel", origem: "painel", docId: a.id };
+    });
+    lista.forEach(function (c) { c.pacote_ok = c.s !== "saiu do grupo" && !!(c.vence && c.vence >= hoje()) || (c.cor === "bege" && c.s !== "saiu do grupo"); });
+    return lista;
+  }
+
+  function filtrar(lista, f) {
+    return lista.filter(function (c) {
+      switch (f) {
+        case "atencao": return c.s === "vencido" || c.s === "atrasado" || c.s === "vencendo" || c.s === "saiu do grupo" && c.grupo;
+        case "emdia": return c.s === "em dia";
+        case "vencendo": return c.s === "vencendo";
+        case "atraso": return c.s === "vencido" || c.s === "atrasado";
+        case "vigente": return c.pacote_ok && c.plano !== "mensal" && c.s !== "saiu do grupo";
+        case "saiu": return c.s === "saiu do grupo";
+        case "conferir": return c.s === "precisa conferir" || (c.conferir && c.conferir.length);
+        case "lancar": return c.lancar;
+        case "aviso": return !!c.aviso;
+        default: return c.s !== "saiu do grupo";
+      }
+    });
+  }
+  var ORDEM = { "atrasado": 0, "vencido": 1, "saiu do grupo": 2, "vencendo": 3, "precisa conferir": 4, "em dia": 5 };
+  function ordenar(l) { return l.sort(function (a, b) { return (ORDEM[a.s] - ORDEM[b.s]) || ((a.vence || 0) - (b.vence || 0)) || a.nome.localeCompare(b.nome); }); }
+
+  function chip(s) { var x = SIT[s] || [s, "s-conf"]; return '<span class="chip ' + x[1] + '">' + esc(x[0]) + "</span>"; }
+  function linhaCliente(c, i) {
+    var nota = c.manual ? '<div class="sub"><span class="chip s-lanc">' + esc(c.manual.tipo === "precisa conferir" ? "Tipo a conferir" : "Cliente " + c.manual.tipo) + " · " + (c.manual.origem === "entrada no grupo" ? "cadastro automático" : "cadastro manual") + "</span></div>" : c.lancar ? '<div class="sub"><span class="chip s-lanc">Pago · falta lançar</span></div>' :
+      (c.conferir && c.conferir.length ? '<div class="sub">⚠ ' + esc(c.conferir[0]) + "</div>" : "");
+    var grupo = c.grupo ? '<span title="' + esc(c.grupo.nome) + '">✓ ' + esc(c.grupo.nome || "(sem nome)") + "</span>" :
+      (c.parecido ? '<span class="sub">nome parecido</span>' : '<span class="sub">não achei</span>');
+    if (c.aviso) nota += '<div class="sub"><span class="chip s-venc">Avisou atraso · ' + esc(fmt(parse(c.aviso.data))) + "</span> " + esc(c.aviso.texto || "") + "</div>";
+    var bAviso = state.podeEscrever && c.s !== "saiu do grupo" ? '<button class="icon-btn" type="button" data-aviso="' + esc(c.k) + '" data-nome="' + esc(c.nome) + '" data-tem="' + (c.aviso ? "1" : "") +
+      '" title="' + (c.aviso ? "Tirar o aviso de atraso de " : "Marcar que avisou atraso: ") + esc(c.nome) + '" aria-label="' + (c.aviso ? "Tirar aviso de atraso" : "Marcar aviso de atraso") +
+      '"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>' + (c.aviso ? '<path d="M5 5l14 14"/>' : "") + "</svg></button>" : "";
+    var acao = bAviso + (state.podeEscrever ? '<button class="icon-btn" type="button" data-pagar="' + esc(c.nome) + '" data-plano="' + esc(c.plano || "mensal") + '" title="Registrar pagamento de ' + esc(c.nome) + '" aria-label="Registrar pagamento de ' + esc(c.nome) + '"><svg viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg></button>' : "");
+    return "<tr><td><div class='pessoa'><span class='av " + AV[i % 4] + "'>" + esc(iniciais(c.nome)) + "</span><div><div class='nome'>" + esc(c.nome) + "</div>" + nota + "</div></div></td>" +
+      "<td>" + esc(MESES_PLANO[c.plano] ? cap(c.plano) : "Conferir") + "</td><td>" + reais(c.valor) + "</td>" +
+      "<td>" + fmt(c.vence) + (c.confirmado && c.confirmado.so_mes && !c.online ? "<div class='sub'>dia a confirmar</div>" : "") + "</td>" +
+      "<td>" + chip(c.s) + "<div class='sub'>" + esc(c.s === "saiu do grupo" ? "vermelho na planilha" : diasTxt(c)) + "</div></td>" +
+      "<td>" + grupo + "</td><td>" + acao + "</td></tr>";
+  }
+  function tabela(lista, vazio) {
+    if (!lista.length) return '<p class="vazio">' + esc(vazio) + "</p>";
+    return "<table><thead><tr><th>Cliente</th><th>Plano</th><th>Valor</th><th>Vencimento</th><th>Status</th><th>No grupo</th><th><span class='sub'>Ações</span></th></tr></thead><tbody>" +
+      lista.map(linhaCliente).join("") + "</tbody></table>";
+  }
+  function tabs(id, opcoes, atual, onPick) {
+    var box = el(id);
+    box.innerHTML = opcoes.map(function (o) { return '<button class="tab" role="tab" type="button" data-f="' + o[0] + '" aria-selected="' + (o[0] === atual) + '">' + esc(o[1]) + " (" + o[2] + ")</button>"; }).join("");
+    box.onclick = function (ev) { var b = ev.target.closest("[data-f]"); if (b) onPick(b.getAttribute("data-f")); };
+  }
+
+  function buscaFiltra(lista) {
+    var q = normal(state.busca); if (!q) return lista;
+    return lista.filter(function (c) { return normal(c.nome + " " + (c.grupo ? c.grupo.nome + " " + c.grupo.user : "")).indexOf(q) >= 0; });
+  }
+
+  function graficoReceita(box, alto) {
+    var r = (state.base && state.base.receita) || [];
+    if (!r.length) { box.innerHTML = '<p class="vazio">Sem dados.</p>'; return; }
+    var W = 320, H = alto, padL = 44, padB = 26, padT = 12, w = W - padL - 8, h = H - padB - padT;
+    var max = Math.max.apply(null, r.map(function (x) { return x.valor || 0; }));
+    var passo = max > 4000 ? 2000 : 1000, topo = Math.ceil(max / passo) * passo || passo;
+    var bw = w / r.length * 0.62, s = '<svg class="grafico" viewBox="0 0 ' + W + " " + H + '" role="img" aria-label="Receita por mês">';
+    for (var t = 0; t <= topo; t += passo) {
+      var y = padT + h - t / topo * h;
+      s += '<line x1="' + padL + '" x2="' + (W - 8) + '" y1="' + y + '" y2="' + y + '" stroke="var(--line)"/>';
+      s += '<text x="' + (padL - 6) + '" y="' + (y + 4) + '" text-anchor="end" font-size="10" fill="var(--muted)">' + (t / 1000) + " mil</text>";
+    }
+    r.forEach(function (x, i) {
+      var cx = padL + w / r.length * (i + 0.5), ult = i === r.length - 1;
+      if (x.valor == null) {
+        s += '<rect x="' + (cx - bw / 2) + '" y="' + (padT + h - 18) + '" width="' + bw + '" height="18" rx="4" fill="none" stroke="var(--muted)" stroke-dasharray="3 3"/>';
+        s += '<text x="' + cx + '" y="' + (padT + h - 24) + '" text-anchor="middle" font-size="9" fill="var(--muted)">sem valor</text>';
+      } else {
+        var bh = x.valor / topo * h;
+        s += '<rect x="' + (cx - bw / 2) + '" y="' + (padT + h - bh) + '" width="' + bw + '" height="' + bh + '" rx="5" fill="' + (ult ? "var(--brand)" : "var(--lav-ink)") + '" opacity="' + (ult ? 1 : 0.45) + '"><title>' + x.mes + "/" + x.ano + ": " + reais(x.valor) + "</title></rect>";
+        if (ult) s += '<text x="' + cx + '" y="' + (padT + h - bh - 5) + '" text-anchor="middle" font-size="10" font-weight="700" fill="var(--ink)">' + Math.round(x.valor).toLocaleString("pt-BR") + "</text>";
+      }
+      s += '<text x="' + cx + '" y="' + (H - 8) + '" text-anchor="middle" font-size="11" fill="var(--muted)">' + x.mes + "</text>";
+    });
+    box.innerHTML = s + "</svg>";
+  }
+
+  function render() {
+    var b = state.base, lista = clientes();
+    el("fresco").textContent = b ? "Dados de " + b.gerado_em : "Sem dados ainda";
+    if (!b) return;
+    var ativos = lista.filter(function (c) { return c.s !== "saiu do grupo"; });
+    var n = function (f) { return filtrar(lista, f).length; };
+    el("k-ativos").textContent = ativos.length;
+    el("k-ativos-sub").textContent = "lista de " + b.mes;
+    var ult = b.receita[b.receita.length - 1];
+    el("k-receita-rot").textContent = "Receita de " + b.mes.split("/")[0];
+    el("k-receita").textContent = ult && ult.valor ? reais(ult.valor) : "—";
+    // próximos vencimentos agrupados pelo dia (hoje: dia 10 e dia 20; a partir de dezembro, cada cliente no seu dia)
+    var porDia = {}, h0 = hoje();
+    ativos.forEach(function (c) { if (c.vence && c.vence >= h0) { var k = isoDia(c.vence); porDia[k] = (porDia[k] || 0) + 1; } });
+    var dias = Object.keys(porDia).sort().filter(function (k, i) { return i < 3 && Math.round((parse(k) - h0) / 864e5) <= 35; });
+    function faltam(k) { var d = Math.round((parse(k) - h0) / 864e5); return d === 0 ? "vence HOJE" : d === 1 ? "vence amanhã" : "faltam " + d + " dias"; }
+    el("k-venc-rot").textContent = dias.length ? "Vencem dia " + dias[0].slice(8, 10) + "/" + dias[0].slice(5, 7) : "Próximo vencimento";
+    el("k-vencendo").textContent = dias.length ? porDia[dias[0]] : 0;
+    var sete = ativos.filter(function (c) { return c.vence && c.vence >= h0 && (c.vence - h0) / 864e5 <= 7; }).length;
+    el("k-venc-lista").innerHTML = dias.map(function (k) {
+      return "<li><b>Dia " + k.slice(8, 10) + "/" + k.slice(5, 7) + "</b> · " + porDia[k] + (porDia[k] === 1 ? " cliente" : " clientes") + " · " + faltam(k) + "</li>"; }).join("") +
+      (dias.length > 1 && porDia[dias[0]] < sete ? "<li>" + sete + " clientes nos próximos 7 dias</li>" : "");
+    el("k-atraso").textContent = n("atraso");
+    el("mes-txt").textContent = "· " + b.mes;
+
+    var optsP = [["atencao", "Precisam de atenção", n("atencao")], ["vencendo", "Vencendo", n("vencendo")], ["atraso", "Em atraso", n("atraso")], ["lancar", "Falta lançar", n("lancar")]];
+    tabs("tabs-painel", optsP, state.filtroPainel, function (f) { state.filtroPainel = f; render(); });
+    // 05/11: com algo na busca, procura em TODOS os clientes (não só na aba aberta) — antes a Camila "sumia"
+    var buscando = !!normal(state.busca);
+    var lp = ordenar(buscaFiltra(buscando ? lista : filtrar(lista, state.filtroPainel)));
+    el("tabela-painel").innerHTML = (buscando ? '<p class="sub">Buscando em todos os clientes</p>' : "") + tabela(lp.slice(0, buscando ? 30 : 8), buscando ? "Nenhum cliente com esse nome." : "Ninguém aqui agora.") + (lp.length > (buscando ? 30 : 8) ? '<p class="sub">e mais ' + (lp.length - (buscando ? 30 : 8)) + "…</p>" : "");
+
+    var optsC = [["todos", "Ativos", n("todos")], ["emdia", "Em dia", n("emdia")], ["vencendo", "Vencendo", n("vencendo")], ["atraso", "Em atraso", n("atraso")],
+      ["vigente", "Pacote vigente", n("vigente")], ["lancar", "Falta lançar", n("lancar")], ["conferir", "Conferir", n("conferir")], ["aviso", "Avisou atraso", n("aviso")], ["saiu", "Saíram do grupo", n("saiu")]];
+    tabs("tabs-clientes", optsC, state.filtroClientes, function (f) { state.filtroClientes = f; render(); });
+    el("tabela-clientes").innerHTML = (buscando ? '<p class="sub">Buscando em todos os clientes</p>' : "") + tabela(ordenar(buscaFiltra(buscando ? lista : filtrar(lista, state.filtroClientes))), buscando ? "Nenhum cliente com esse nome." : "Nenhum cliente com esse filtro.");
+
+    var g = b.quem || {}, prox = [
+      ["#F2B705", n("vencendo") + " clientes vencem em até 7 dias", "#clientes", "vencendo"],
+      ["#E5484D", n("atraso") + " clientes em atraso", "#clientes", "atraso"],
+      ["#E5484D", b.devem_sair.length + " devem sair do grupo", "#grupo", ""],
+      ["#25A55F", (b.a_conferir || []).length + " comprovantes do WhatsApp para conferir", "#pagamentos", ""],
+      ["#3B82F6", (b.entradas || []).filter(function (e) { return (e.resultado || "").indexOf("cadastrada") === 0; }).length + " entraram no grupo e foram cadastradas", "#grupo", ""],
+      ["#7B4FD6", n("lancar") + " pagos faltam lançar na planilha", "#pagamentos", ""],
+      ["#9A93A8", (b.conferir_grupo.length + n("conferir")) + " casos para conferir", "#clientes", "conferir"]
+    ];
+    el("proximas").innerHTML = prox.map(function (p) { return '<li><a href="' + p[2] + '"' + (p[3] ? ' data-filtro="' + p[3] + '"' : "") + '><span class="ponto" style="background:' + p[0] + '"></span><span><b>' + esc(p[1].split(" ")[0]) + "</b> " + esc(p[1].split(" ").slice(1).join(" ")) + '</span><span class="seta">›</span></a></li>'; }).join("");
+    graficoReceita(el("grafico-mini"), 190);
+    graficoReceita(el("grafico-grande"), 240);
+
+    // pagamentos
+    el("lista-nomes").innerHTML = b.clientes.map(function (c) { return '<option value="' + esc(c.nome) + '">'; }).join("");
+    el("cartao-form").hidden = !state.podeEscrever;
+    el("lista-online").innerHTML = state.pags.length ? "<table><tbody>" + state.pags.map(function (p) {
+      return "<tr><td><div class='nome'>" + esc(p.nome) + "</div><div class='sub'>" + esc(cap(p.plano)) + " · " + fmt(parse(p.data)) + (p.valor ? " · " + reais(p.valor) : "") + (p.obs ? " · " + esc(p.obs) : "") + "</div></td>" +
+        "<td style='text-align:right'>" + (state.podeEscrever ? '<button class="btn btn-ghost" type="button" data-apagar="' + esc(p.id) + '">Desfazer</button>' : "") + "</td></tr>";
+    }).join("") + "</tbody></table>" : '<p class="vazio">Nenhum pagamento registrado por aqui ainda.</p>';
+    var feitosAqui = {}; state.pags.forEach(function (p) { if (p.conferir_id) feitosAqui[p.conferir_id] = 1; });
+    var ac = (b.a_conferir || []).filter(function (x) { return !feitosAqui[x.id]; });
+    el("lista-conferir").innerHTML = ac.length ? "<table><tbody>" + ac.map(function (x, i) {
+      var quem = x.nome_agenda || x.nome_whatsapp || x.pagador || "sem nome";
+      return "<tr><td><div class='nome'>" + esc(quem) + (x.telefone_fim ? " <span class='sub'>tel. …" + esc(x.telefone_fim) + "</span>" : "") + "</div><div class='sub'>" +
+        (x.valor ? reais(x.valor) : "valor ?") + " · " + (x.data ? fmt(parse(x.data)) : "data ?") + (x.pagador ? " · pagou: " + esc(x.pagador) : "") +
+        "</div><div class='sub'>⚠ " + esc((x.motivos || []).join("; ")) + "</div></td><td style='text-align:right'>" +
+        (state.podeEscrever ? '<button class="btn btn-ghost" type="button" data-conferir="' + i + '">Conferir</button>' : "") + "</td></tr>";
+    }).join("") + "</tbody></table>" : '<p class="vazio">Nenhum comprovante esperando você.</p>';
+    state.acLista = ac;
+    var lanc = lista.filter(function (c) { return c.lancar; });
+    el("lista-lancar").innerHTML = lanc.length ? "<table><tbody>" + lanc.map(function (c) {
+      var antes = c.confirmado && !c.online ? "antes: " + c.confirmado.antes : "registrado aqui";
+      return "<tr><td><div class='nome'>" + esc(c.nome) + "</div><div class='sub'>" + esc(cap(c.plano)) + " · vence " + fmt(c.vence) + " · " + esc(antes) + "</div></td><td>" + chip(c.s) + "</td></tr>";
+    }).join("") + "</tbody></table>" : '<p class="vazio">Nada esperando a planilha.</p>';
+
+    // planos
+    el("planos").innerHTML = ["mensal", "trimestral", "semestral", "anual"].map(function (p, i) {
+      var cs = ativos.filter(function (c) { return c.plano === p; }), vig = cs.filter(function (c) { return c.pacote_ok; }).length;
+      var cores = ["var(--mint-ink)", "var(--lav-ink)", "var(--peach-ink)", "var(--blush-ink)"];
+      return '<div class="plano"><h3 style="color:' + cores[i] + '">' + cap(p) + '</h3><div class="num">' + cs.length + "</div><p>" + vig + " com pacote vigente · " + MESES_PLANO[p] + (MESES_PLANO[p] > 1 ? " meses" : " mês") + "</p></div>";
+    }).join("");
+
+    // grupo
+    var QUEM = [["minha", "Suas (Elo7)", "var(--brand)"], ["minha (pela planilha)", "Suas (nome na planilha)", "var(--lav-ink)"], ["esposo", "Do esposo (fora)", "#6C8EBF"],
+      ["sem marca", "Sem marca", "#B9B3C4"], ["conferir", "Conferir", "#E0B341"], ["equipe", "Equipe", "#8E8798"]];
+    el("grupo-info").textContent = (b.grupo_nome || "Grupo") + " · " + b.contas_no_grupo + " contas · lido em " + b.grupo_lido_em;
+    el("barra-quem").innerHTML = QUEM.filter(function (q) { return g[q[0]]; }).map(function (q) { return '<span style="flex:' + g[q[0]] + ";background:" + q[2] + '" title="' + q[1] + ": " + g[q[0]] + '"></span>'; }).join("");
+    el("legenda-quem").innerHTML = QUEM.filter(function (q) { return g[q[0]]; }).map(function (q) { return '<li><i style="background:' + q[2] + '"></i>' + q[1] + " <b>" + g[q[0]] + "</b></li>"; }).join("");
+    function conta(c) { return esc(c.nome || "(sem nome)") + (c.user ? ' <span class="sub">@' + esc(c.user) + "</span>" : ' <span class="sub">ID ' + esc(c.id) + "</span>"); }
+    function bloco(titulo, explica, cab, linhas, vazio) {
+      return '<div class="cartao"><h2>' + esc(titulo) + ' <span class="chip s-lanc">' + linhas.length + '</span></h2><p class="explica">' + explica + "</p>" +
+        (linhas.length ? '<div class="rolar"><table><thead><tr>' + cab.map(function (h) { return "<th>" + esc(h) + "</th>"; }).join("") + "</tr></thead><tbody>" +
+          linhas.map(function (l) { return "<tr>" + l.map(function (x) { return "<td>" + x + "</td>"; }).join("") + "</tr>"; }).join("") + "</tbody></table></div>" : '<p class="vazio">' + esc(vazio) + "</p>") + "</div>";
+    }
+    var saiuNoGrupo = lista.filter(function (c) { return c.s === "saiu do grupo"; });
+    var cz = b.conciliacao || {}, pedidas = {};
+    state.remocoes.forEach(function (x) { pedidas[String(x.telegram_id)] = x; });
+    var candidatas = (cz.saiu_no_grupo || []).map(function (x) { return Object.assign({ tipoLista: "vermelho na planilha" }, x); })
+      .concat((cz.exclusoes || []).map(function (x) { return Object.assign({ tipoLista: "fora das duas planilhas" }, x); }));
+    state.candidatas = candidatas;
+    var htmlExc = '<div class="cartao"><h2>Possíveis exclusões do grupo <span class="chip s-atraso">' + candidatas.length + "</span>" +
+      (state.podeEscrever && candidatas.some(function (x) { return !pedidas[String(x["ID do Telegram"])]; }) ? '<button class="btn btn-brand dir" type="button" data-remover-todas="1">Remover todas</button>' : "") + "</h2>" +
+      '<p class="explica">Estão em vermelho numa das planilhas, ou não aparecem em nenhuma das duas planilhas vigentes (a sua e a do esposo). Ao tocar em <b>Remover</b>, o robô da nuvem confere de novo (pagamento, comprovante, aviso de atraso, cadastro) e tira do grupo em até 15 minutos. Quem sair pode voltar pelo link se pagar.' +
+      (cz.lido_em ? " Grupo lido em " + esc(cz.lido_em) + "." : "") + "</p>" +
+      (cz.esposo_saiu ? '<p class="explica"><b>' + cz.esposo_saiu + ' pessoa(s) marcada(s) em vermelho (saiu) na planilha do esposo</b> ainda estão no grupo. Os nomes não aparecem aqui, porque são da carteira dele. ' +
+        (state.remocoes.some(function (x) { return x.acao === "esposo_saiu" && !x.resultado; }) ? '<span class="chip s-venc">pedido enviado</span>' :
+          (state.podeEscrever ? '<button class="btn btn-ghost" type="button" data-esposo-saiu="1">Tirar do grupo</button>' : "")) + "</p>" : "") +
+      (candidatas.length ? '<div class="rolar"><table><thead><tr><th>Conta no grupo</th><th>Por quê</th><th></th></tr></thead><tbody>' + candidatas.map(function (x, i) {
+        var id = String(x["ID do Telegram"]), ped = pedidas[id];
+        var acao = ped ? '<span class="chip ' + (ped.resultado === "removida" ? "s-ok" : ped.resultado ? "s-conf" : "s-venc") + '">' + esc(ped.resultado || (ped.acao === "manter" ? "manter pedido" : "remoção pedida")) + "</span>" :
+          (state.podeEscrever ? '<button class="btn btn-ghost" type="button" data-manter="' + i + '">Manter</button> <button class="btn btn-ghost" type="button" data-remover="' + i + '">Remover</button>' : "");
+        return "<tr><td><div class='nome'>" + esc(x["Nome no grupo"]) + "</div><div class='sub'>" + esc(x["@"] || "") + " · ID " + esc(id) + "</div></td><td><div class='sub'>" +
+          esc(x.tipoLista) + (x.Motivo ? " — " + esc(x.Motivo) : "") + "</div></td><td style='text-align:right'>" + acao + "</td></tr>";
+      }).join("") + "</tbody></table></div>" : '<p class="vazio">' + (cz.erro ? "A conferência deu erro: " + esc(cz.erro) : "Ninguém para tirar do grupo.") + "</p>") + "</div>";
+    var ent = (b.entradas || []).slice().reverse();
+    el("listas-grupo").innerHTML = htmlExc +
+      '<div class="cartao"><h2>Acabaram de entrar no grupo <span class="chip s-lanc">' + ent.length + "</span></h2>" +
+      '<p class="explica">Quando você coloca alguém no grupo, o robô percebe (de 30 em 30 minutos) e cria o cadastro sozinho. Fica “precisa conferir” até o pagamento chegar.</p>' +
+      (ent.length ? '<div class="rolar"><table><thead><tr><th>Entrou</th><th>Conta</th><th>Tipo</th><th>O que o robô fez</th></tr></thead><tbody>' + ent.map(function (e) {
+        var tp = e.tipo === "nova" ? '<span class="chip s-ok">Nova</span>' : e.tipo === "retorno" ? '<span class="chip s-lanc">Retorno</span>' : e.tipo ? '<span class="chip s-conf">Conferir</span>' : "";
+        return "<tr><td>" + fmt(parse(e.entrou)) + "</td><td><div class='nome'>" + esc(e.nome_grupo || "(sem nome)") + "</div>" + (e.user ? "<div class='sub'>@" + esc(e.user) + "</div>" : "") +
+          "</td><td>" + tp + (e.porque ? "<div class='sub'>" + esc(e.porque) + "</div>" : "") + "</td><td>" + esc(e.resultado) + "</td></tr>";
+      }).join("") + "</tbody></table></div>" : '<p class="vazio">Ninguém entrou desde que o robô começou a observar (03/11).</p>') + "</div>" +
+      bloco("Devem sair do grupo", "Vermelho na planilha ou atraso real, com Elo7 e identificação segura. Ninguém é removido sozinho.", ["Conta", "Cliente", "Por quê"],
+        b.devem_sair.map(function (d) { return [conta(d), esc(d.cliente), esc(d.porque)]; }), "Ninguém para sair agora.") +
+      bloco("Saíram do grupo (vermelho na planilha)", "Pintadas de vermelho na lista do mês.", ["Cliente", "No grupo agora"],
+        saiuNoGrupo.map(function (c) { return [esc(c.nome), c.grupo ? '<span class="chip s-atraso">Ainda está</span> ' + conta(c.grupo) : (c.parecido ? '<span class="chip s-conf">Nome parecido</span>' : '<span class="chip s-ok">Já saiu</span>')]; }), "Ninguém em vermelho.") +
+      bloco("Vermelho em meses anteriores e ainda no grupo", "Não estão na lista do mês, mas o mesmo nome ficou vermelho antes. Conferir.", ["Conta", "Nome em vermelho", "Mês"],
+        b.saiu_antes.map(function (d) { return [conta(d), esc(d.nome_vermelho), esc(d.mes)]; }), "Ninguém.") +
+      bloco("Nomes parecidos", "Pode ser a mesma pessoa, sem certeza.", ["Na planilha", "No grupo", "Parecido"],
+        b.parecidos.map(function (p) { return [esc(p.cliente), conta(p.conta), p.nota + "%"]; }), "Nenhum.") +
+      bloco("Contas para conferir", "Sem nome, sem marca, Elo7 e RF juntos, ou Elo7 sem nome na lista do mês. Nada é decidido sozinho.", ["Conta", "Motivo"],
+        b.conferir_grupo.map(function (d) { return [conta(d), esc(d.motivo)]; }), "Nada para conferir.") +
+      bloco("Possíveis duplicados", "", ["Onde", "O que eu vi"], b.duplicados.map(function (d) { return [esc(d.onde), esc(d.texto)]; }), "Nenhum.");
+
+    // novo cliente
+    el("cartao-novo").hidden = !state.podeEscrever;
+    el("lista-novos").innerHTML = state.novos.length ? "<table><tbody>" + state.novos.map(function (nv) {
+      return "<tr><td><div class='nome'>" + esc(nv.nome) + "</div><div class='sub'>" + esc(nv.tipo === "nova" ? "Nova" : "Retorno") + " · " + esc(cap(nv.plano)) +
+        " · " + (nv.valor ? reais(nv.valor) : "sem valor") + (nv.vencimento ? " · vence " + fmt(parse(nv.vencimento)) : "") + "</div>" +
+        ((nv.conferir || []).length ? "<div class='sub'>⚠ " + esc(nv.conferir.join("; ")) + "</div>" : "") + "</td><td style='text-align:right'>" +
+        (state.podeEscrever ? '<button class="btn btn-ghost" type="button" data-apagar-novo="' + esc(nv.id) + '">Desfazer</button>' : "") + "</td></tr>";
+    }).join("") + "</tbody></table>" : '<p class="vazio">Nenhuma cliente cadastrada por aqui ainda.</p>';
+    resumoNovo();
+
+    // cobrança
+    var cb = b.cobranca || {}, ct = b.cobranca_textos || {};
+    var ensaio = (cb.modo || ct.modo) !== "ativo";
+    el("cob-modo").hidden = false;
+    el("cob-modo").textContent = (ensaio ? "MODO ENSAIO: o robô monta as listas, mas ainda não manda lembrete nem tira ninguém do grupo. " :
+      "MODO ATIVO: lembretes e saídas acontecem sozinhos. ") + (cb.data ? "Última rodada: " + fmt(parse(cb.data)) + "." : "Ainda não rodou.") +
+      (cb.freio ? " FREIO: " + cb.freio : "");
+    function linhaCob(x, extra) {
+      return "<tr><td><div class='nome'>" + esc(x.nome) + "</div><div class='sub'>" + esc(cap(x.plano || "")) + (x.vence ? " · vence " + fmt(parse(x.vence)) : "") +
+        (x.telefone_fim ? " · tel. …" + esc(x.telefone_fim) : "") + "</div>" + (extra ? "<div class='sub'>" + extra + "</div>" : "") + "</td><td style='text-align:right'>" +
+        (x.resultado ? '<span class="chip s-conf">' + esc(x.resultado) + "</span>" : "") + "</td></tr>";
+    }
+    function blocoCob(titulo, lista, vazio, extraFn) {
+      return '<div class="cartao"><h2>' + esc(titulo) + ' <span class="chip s-lanc">' + lista.length + "</span></h2>" +
+        (lista.length ? '<div class="rolar"><table><tbody>' + lista.map(function (x) { return linhaCob(x, extraFn ? extraFn(x) : ""); }).join("") + "</tbody></table></div>"
+          : '<p class="vazio">' + esc(vazio) + "</p>") + "</div>";
+    }
+    el("cob-listas").innerHTML =
+      blocoCob("Saem do grupo hoje (D+1)", cb.sair || [], "Ninguém sai hoje.", function (x) { return "⚠ " + esc(x.motivo); }) +
+      blocoCob("É hoje (vence hoje)", cb.d0 || [], "Ninguém vence hoje.") +
+      blocoCob("Faltam 2 dias", cb.d2 || [], "Ninguém nesta etapa hoje.") +
+      blocoCob("Lembrete 5 dias antes", cb.d5 || [], "Ninguém nesta etapa hoje.") +
+      blocoCob("Estamos com saudades (saiu há 2 dias)", cb.saudades || [], "Ninguém nesta etapa hoje.") +
+      blocoCob("Venceu, mas NÃO sai (protegida)", cb.nao_sai || [], "Ninguém protegido hoje.", function (x) { return "🛡 " + esc((x.por_que_nao || []).join("; ")); }) +
+      blocoCob("Sem telefone certo (não recebem lembrete)", cb.sem_telefone || [], "Todas têm telefone.") +
+      '<div class="cartao"><h2>Histórico de saídas <span class="chip s-lanc">' + (b.saidas || []).length + "</span></h2>" +
+        ((b.saidas || []).length ? '<div class="rolar"><table><thead><tr><th>Data</th><th>Cliente</th><th>Motivo</th><th>Resultado</th></tr></thead><tbody>' +
+          b.saidas.slice().reverse().map(function (s) { return "<tr><td>" + esc(s.data) + "</td><td>" + esc(s.cliente) + "<div class='sub'>" + esc(s.conta_grupo || "") + "</div></td><td>" + esc(s.motivo) + "</td><td>" + esc(s.resultado) + "</td></tr>"; }).join("") +
+          "</tbody></table></div>" : '<p class="vazio">Ninguém saiu do grupo pelo robô ainda.</p>') + "</div>";
+    var camp = b.campanha_cobranca || {}, fx = b.fichas || {};
+    el("cob-textos").innerHTML = (camp.etapas || []).map(function (e) {
+      return "<p><b>" + esc(e.etapa) + "</b> " + (e.aprovado ? '<span class="chip s-ok">aprovado</span>' : '<span class="chip s-conf">ainda não aprovado</span>') +
+        (e.imagem ? ' <span class="sub">🖼 ' + esc(e.imagem) + "</span>" : ' <span class="sub">sem imagem</span>') + "<br>" +
+        esc((e.texto || "—").replace("{nome}", "Maria").replace("{data}", "10/11").replace("{link}", camp.link || "(link da página de pagamento)")).replace(/\n/g, "<br>") + "</p>";
+    }).join("") + (Object.keys(fx).length ? '<p class="sub">Fichas: ' + Object.keys(fx).map(function (k) { return esc(k.replace(/_/g, " ").toLowerCase()) + " " + fx[k]; }).join(" · ") + "</p>" : "") +
+      '<p class="sub">Exemplo com “Maria” e vencimento 10/11. Imagens e textos ficam em ROBÔ › MEUS ARQUIVOS › CAMPANHAS › COBRANCA.</p>';
+
+    // relatórios
+    el("rel-sit").innerHTML = [["em dia", "var(--mint-ink)"], ["vencendo", "var(--butter-ink)"], ["vencido", "var(--peach-ink)"], ["atrasado", "var(--blush-ink)"], ["precisa conferir", "var(--gray-ink)"], ["saiu do grupo", "var(--blush-ink)"]]
+      .map(function (s) { return '<li><i style="background:' + s[1] + '"></i>' + SIT[s[0]][0] + " <b>" + lista.filter(function (c) { return c.s === s[0]; }).length + "</b></li>"; }).join("");
+    desenharFinancas();
+  }
+
+  // navegação
+  function mostrar(v) {
+    if (!TITULOS[v]) v = "painel";
+    document.querySelectorAll(".view").forEach(function (s) { s.hidden = s.getAttribute("data-view") !== v; });
+    document.querySelectorAll("#menu a").forEach(function (a) { a.classList.toggle("ativo", a.getAttribute("data-v") === v); });
+    el("titulo").textContent = TITULOS[v];
+  }
+  function daHash() { mostrar((location.hash || "#painel").slice(1)); }
+  window.addEventListener("hashchange", daHash);
+  document.addEventListener("click", function (ev) {
+    var a = ev.target.closest("a[href^='#']");
+    if (a) {
+      var f = a.getAttribute("data-filtro"); if (f) { state.filtroClientes = f; render(); }
+      if (a.hasAttribute("data-novo")) setTimeout(function () { el("f-nome").focus(); }, 0);
+      ev.preventDefault(); location.hash = a.getAttribute("href"); daHash(); window.scrollTo(0, 0);
+    }
+    var p = ev.target.closest("[data-pagar]");
+    if (p) { el("f-nome").value = p.getAttribute("data-pagar"); el("f-plano").value = p.getAttribute("data-plano"); location.hash = "#pagamentos"; daHash(); el("f-data").focus(); }
+    var rm = ev.target.closest("[data-remover]"), rt = ev.target.closest("[data-remover-todas]");
+    if ((rm || rt) && state.db && state.candidatas) {
+      var lista = rt ? state.candidatas : [state.candidatas[+rm.getAttribute("data-remover")]];
+      var ja = {}; state.remocoes.forEach(function (x) { ja[String(x.telegram_id)] = 1; });
+      var todas = lista.filter(function (x) { return !(rt && x.manter); });
+      (rm || rt).disabled = true;
+      lista.filter(function (x) { return !ja[String(x["ID do Telegram"])]; }).reduce(function (pr, x) {
+        return pr.then(function () { return SB.from("remocoes").insert({ dados: { telegram_id: x["ID do Telegram"], nome: x["Nome no grupo"],
+          motivo: x.tipoLista + (x.Motivo ? ": " + x.Motivo : ""), aprovado_em: new Date().toISOString() } }); });
+      }, Promise.resolve()).then(carregar);
+    }
+    var es = ev.target.closest("[data-esposo-saiu]");
+    if (es && state.db) { es.disabled = true; SB.from("remocoes").insert({ dados: { acao: "esposo_saiu", telegram_id: 0, nome: "vermelhas do esposo",
+      aprovado_em: new Date().toISOString() } }).then(carregar); }
+    var mt = ev.target.closest("[data-manter]");
+    if (mt && state.db && state.candidatas) {
+      var xm = state.candidatas[+mt.getAttribute("data-manter")]; mt.disabled = true;
+      SB.from("remocoes").insert({ dados: { acao: "manter", telegram_id: xm["ID do Telegram"], nome: xm["Nome no grupo"],
+        motivo: "mantida por ela no painel", aprovado_em: new Date().toISOString() } }).then(carregar);
+    }
+    var cf = ev.target.closest("[data-conferir]");
+    if (cf && state.acLista) {
+      var x = state.acLista[+cf.getAttribute("data-conferir")];
+      el("f-nome").value = x.cliente_sugerida || x.nome_agenda || x.pagador || "";
+      if (x.plano_pelo_valor) el("f-plano").value = x.plano_pelo_valor;
+      if (x.data) el("f-data").value = x.data;
+      el("f-valor").value = x.valor || "";
+      el("f-obs").value = "comprovante do WhatsApp" + (x.pagador ? " de " + x.pagador : "");
+      state.conferindo = x.id; el("f-msg").className = "msg"; el("f-msg").textContent = "Confira a cliente e toque em Registrar.";
+      el("cartao-form").scrollIntoView({ block: "start" }); el("f-nome").focus();
+    }
+    var av = ev.target.closest("[data-aviso]");
+    if (av && state.db) {
+      av.disabled = true;
+      var k = av.getAttribute("data-aviso"), nome = av.getAttribute("data-nome"), tem = av.getAttribute("data-tem");
+      var existe = state.avisosM.find(function (a) { return a.k === k; });
+      var feito = existe ? state.db.doc("avisos_manuais/" + existe.id).delete() :
+        state.db.collection("avisos_manuais").add({ k: k, nome: nome, acao: tem ? "remover" : "marcar", data: el("f-data").value, obs: tem ? "" : "avisou atraso (marcado no painel)", registrado_em: new Date().toISOString() });
+      feito.catch(function () { av.disabled = false; });
+    }
+    var dn = ev.target.closest("[data-apagar-novo]");
+    if (dn && state.db) { dn.disabled = true; state.db.doc("clientes_novos/" + dn.getAttribute("data-apagar-novo")).delete().catch(function () { dn.disabled = false; }); }
+    var d = ev.target.closest("[data-apagar]");
+    if (d && state.db) { d.disabled = true; state.db.doc("pagamentos/" + d.getAttribute("data-apagar")).delete().catch(function () { d.disabled = false; }); }
+  });
+  el("busca").addEventListener("input", function () { state.busca = this.value; render(); });
+
+  // formulário
+  el("f-data").value = new Date(Date.now() - new Date().getTimezoneOffset() * 6e4).toISOString().slice(0, 10);
+  el("form-pag").addEventListener("submit", function (ev) {
+    ev.preventDefault();
+    var nome = el("f-nome").value.trim(), msg = el("f-msg");
+    if (!nome || !state.db) return;
+    var achada = state.base && state.base.clientes.find(function (c) { return c.nome.toLowerCase() === nome.toLowerCase(); });
+    var doc = { nome: achada ? achada.nome : nome, k: achada ? achada.k : normal(nome), plano: el("f-plano").value, data: el("f-data").value,
+      valor: parseFloat(el("f-valor").value) || null, obs: el("f-obs").value.trim(), origem: state.conferindo ? "whatsapp (aprovado por você)" : "painel online",
+      conferir_id: state.conferindo || null, registrado_em: new Date().toISOString() };
+    state.conferindo = null;
+    el("f-enviar").disabled = true; msg.className = "msg"; msg.textContent = "Registrando…";
+    state.db.collection("pagamentos").add(doc).then(function () {
+      msg.className = "msg ok"; msg.textContent = "Registrado: " + doc.nome + " está paga" + (achada ? "." : " (cliente nova).");
+      el("f-nome").value = ""; el("f-valor").value = ""; el("f-obs").value = "";
+    }).catch(function (e) {
+      msg.className = "msg erro"; msg.textContent = e && e.code === "invalid_argument" ? "Só a dona do painel pode registrar." : "Não consegui registrar. Tente de novo em instantes.";
+    }).then(function () { el("f-enviar").disabled = false; });
+  });
+
+  // ---- cadastro manual ----
+  var PRECO = { mensal: 30, trimestral: 75, semestral: 129, anual: 219 }, NOVA = 10;
+  var valorTocado = false, tipoTocado = false;
+  function calcNovo() {
+    var nome = el("n-nome").value.trim(), k = normal(nome), tipo = el("n-tipo").value, plano = el("n-plano").value;
+    var periodo = tipo === "nova" ? "mensal" : plano, esperado = tipo === "nova" ? NOVA : PRECO[plano];
+    var valor = el("n-valor").value === "" ? null : parseFloat(el("n-valor").value);
+    var pg = el("n-pagou").value ? parse(el("n-pagou").value) : null;
+    var venc = pg ? somarMeses(pg, MESES_PLANO[periodo]) : null, conf = [];
+    var noMes = state.base && state.base.clientes.some(function (c) { return c.k === k; });
+    var jaFoi = state.base && state.base.ja_foi_cliente && state.base.ja_foi_cliente[k];
+    if (!pg) conf.push("sem data de pagamento: cadastrada, mas ainda não conta como paga");
+    if (valor == null) conf.push("sem valor pago");
+    else if (Math.abs(valor - esperado) > 0.009) conf.push("pagou " + reais(valor) + ", o esperado para cliente " + tipo + " é " + reais(esperado));
+    if (noMes) conf.push("já está na lista do mês com esse nome");
+    if (tipo === "nova" && jaFoi) conf.push("marcada como nova, mas o nome aparece na planilha (último mês: " + jaFoi + ")");
+    if (k.split(" ").length < 2) conf.push("nome de uma palavra só: o grupo e o WhatsApp não acham com certeza");
+    var tel = el("n-tel").value.replace(/\D/g, ""); if (tel && (tel.length < 10 || tel.length > 13)) conf.push("telefone não entendido");
+    var arr = el("n-arroba").value.trim().replace(/^@/, ""); if (arr && !/^[A-Za-z0-9_]{4,32}$/.test(arr)) conf.push("@ do Telegram não entendido");
+    return { nome: nome, k: k, tipo: tipo, plano: plano, periodo: periodo, valor: valor, valor_esperado: esperado, valor_depois: PRECO[plano],
+      data_entrada: el("n-entrada").value, data_pagamento: el("n-pagou").value, vencimento: venc ? venc.toISOString().slice(0, 10) : "",
+      telegram: arr, telefone: el("n-tel").value.trim(), conferir: conf, status: conf.length ? "precisa conferir" : "pago",
+      noMes: noMes, jaFoi: jaFoi };
+  }
+  function resumoNovo() {
+    if (!el("n-resumo")) return;
+    var x = calcNovo();
+    el("n-dica").textContent = !x.k ? "" : x.noMes ? "⚠ Essa cliente já está na lista do mês." :
+      x.jaFoi ? "Já foi cliente (último mês na planilha: " + x.jaFoi + "): sugiro Retorno." : "Nome novo na planilha: sugiro Nova.";
+    el("n-resumo").innerHTML = "<b>Paga agora:</b> " + (x.tipo === "nova" ? "1º mês" : cap(x.plano)) + " · esperado " + reais(x.valor_esperado) +
+      "<br><b>Vencimento:</b> " + (x.vencimento ? fmt(parse(x.vencimento)) : "— (falta a data do pagamento)") +
+      "<br><b>Depois:</b> " + cap(x.plano) + " " + reais(x.valor_depois) + "<br><b>Status:</b> " + chip(x.status === "pago" ? "em dia" : "precisa conferir") +
+      (x.conferir.length ? "<div class='sub'>⚠ " + esc(x.conferir.join("; ")) + "</div>" : "");
+  }
+  function ajustarValor() { if (!valorTocado) { var x = calcNovo(); el("n-valor").value = x.valor_esperado; } resumoNovo(); }
+  el("n-entrada").value = el("f-data").value; el("n-pagou").value = el("f-data").value;
+  el("n-valor").addEventListener("input", function () { valorTocado = true; resumoNovo(); });
+  el("n-tipo").addEventListener("change", function () { tipoTocado = true; ajustarValor(); });
+  el("n-plano").addEventListener("change", ajustarValor);
+  ["n-tel", "n-arroba", "n-entrada", "n-pagou"].forEach(function (id) { el(id).addEventListener("input", resumoNovo); });
+  el("n-nome").addEventListener("input", function () {
+    var x = calcNovo();
+    if (!tipoTocado && x.k) el("n-tipo").value = x.jaFoi ? "retorno" : "nova";
+    ajustarValor();
+  });
+  el("n-valor").value = NOVA;
+  el("form-novo").addEventListener("submit", function (ev) {
+    ev.preventDefault();
+    var x = calcNovo(), msg = el("n-msg");
+    if (!x.nome || !state.db) return;
+    delete x.noMes; delete x.jaFoi;
+    x.registrado_em = new Date().toISOString(); x.origem = "painel online";
+    el("n-enviar").disabled = true; msg.className = "msg"; msg.textContent = "Cadastrando…";
+    state.db.collection("clientes_novos").add(x).then(function () {
+      msg.className = "msg ok"; msg.textContent = "Cadastrada: " + x.nome + (x.conferir.length ? " (precisa conferir)" : "") + ".";
+      ["n-nome", "n-arroba", "n-tel"].forEach(function (id) { el(id).value = ""; }); valorTocado = false; tipoTocado = false; ajustarValor();
+    }).catch(function (e) {
+      msg.className = "msg erro"; msg.textContent = e && e.code === "invalid_argument" ? "Só a dona do painel pode cadastrar." : "Não consegui cadastrar. Tente de novo em instantes.";
+    }).then(function () { el("n-enviar").disabled = false; });
+  });
+
+  daHash(); render();
+
+  // dados: banco Supabase do Mascatinho (só a conta dela lê e grava)
+  var SB = window.supabase.createClient("https://ubxyayfgyadqsoivfkke.supabase.co", "sb_publishable_YIFCWKukeP5QhSp4iCEUpw_GP4WplyT");
+  var TABELAS = { pagamentos: "pags", clientes_novos: "novos", avisos_manuais: "avisosM" };
+  function erroSB(e) { return { code: e && /row-level|permission|JWT/i.test(e.message || "") ? "invalid_argument" : "unavailable", message: e && e.message } }
+  state.db = {
+    collection: function (nome) { return { add: function (obj) {
+      return SB.from(nome).insert({ dados: obj }).then(function (r) { if (r.error) throw erroSB(r.error); carregar(); }); } }; },
+    doc: function (caminho) { var p = caminho.split("/"); return { delete: function () {
+      return SB.from(p[0]).delete().eq("id", p[1]).then(function (r) { if (r.error) throw erroSB(r.error); carregar(); }); } }; }
+  };
+  function primeiroNome(n) { var p = String(n || "").replace(/[0-9@]/g, " ").trim().split(/\s+/).filter(function (x) { return x.length > 2; }); return p.length ? p[0].charAt(0).toUpperCase() + p[0].slice(1).toLowerCase() : ""; }
+  function desenharAntigos() {
+    var a = state.antigos;
+    if (!a) return;
+    var lista = a.clientes || [], q = (el("ant-busca").value || "").toLowerCase(), sit = el("ant-sit").value,
+      tempo = el("ant-tempo").value, soTel = el("ant-tel").checked, faixa = tempo ? tempo.split("-").map(Number) : null;
+    var saiu = lista.filter(function (c) { return c.situacao === "saiu"; });
+    el("ant-quando").textContent = a.gerado ? "· atualizado " + a.gerado.slice(8, 10) + "/" + a.gerado.slice(5, 7) + " " + a.gerado.slice(11) : "";
+    el("ant-resumo").innerHTML = "<li><b>" + lista.length + "</b>&nbsp;já foram clientes</li><li><b>" + (lista.length - saiu.length) + "</b>&nbsp;ativas hoje</li><li><b>" +
+      saiu.length + "</b>&nbsp;saíram</li><li><b>" + saiu.filter(function (c) { return c.telefone; }).length + "</b>&nbsp;que saíram têm WhatsApp</li>";
+    var f = lista.filter(function (c) {
+      if (sit && c.situacao !== sit) return false;
+      if (faixa && (c.meses_fora < faixa[0] || c.meses_fora > faixa[1])) return false;
+      if (soTel && !c.telefone) return false;
+      return !q || c.nome.toLowerCase().indexOf(q) >= 0;
+    });
+    var texto = a.texto_resgate || "";
+    el("ant-tabela").innerHTML = f.length ? "<table><thead><tr><th>Cliente</th><th>Período</th><th>Pagamentos</th><th>Saiu</th><th></th></tr></thead><tbody>" +
+      f.slice(0, 400).map(function (c) {
+        var wa = c.telefone ? "https://wa.me/" + c.telefone + "?text=" + encodeURIComponent(texto.replace("{nome}", primeiroNome(c.nome))) : "";
+        return "<tr><td><div class='nome'>" + esc(c.nome) + "</div><div class='sub'>" + esc(cap(c.plano || "")) + (c.ultimo_valor ? " · último R$ " + esc(String(c.ultimo_valor).replace(".", ",")) : "") + "</div></td>" +
+          "<td>" + esc(c.primeiro) + (c.primeiro !== c.ultimo ? " → " + esc(c.ultimo) : "") + "<div class='sub'>" + c.meses + (c.meses === 1 ? " mês" : " meses") + "</div></td>" +
+          "<td>" + c.pagamentos + "<div class='sub'>R$ " + esc(String(c.total.toFixed(2)).replace(".", ",")) + "</div></td>" +
+          "<td>" + (c.situacao === "ativa" ? '<span class="chip s-ok">ativa</span>' : (c.meses_fora <= 1 ? "este mês ou o passado" : "há " + c.meses_fora + " meses") +
+            (c.saiu_em ? "<div class='sub'>robô tirou em " + esc(c.saiu_em.split("-").reverse().join("/")) + "</div>" : "")) + "</td>" +
+          "<td style='text-align:right'>" + (wa && c.situacao === "saiu" ? '<a class="btn btn-ghost" target="_blank" rel="noopener" href="' + esc(wa) + '">Chamar</a>' : (c.telefone ? "" : "<span class='sub'>sem WhatsApp</span>")) + "</td></tr>";
+      }).join("") + "</tbody></table>" + (f.length > 400 ? "<p class='sub'>Mostrando 400 de " + f.length + ". Use a busca ou os filtros.</p>" : "")
+      : '<p class="vazio">Ninguém com esses filtros.</p>';
+  }
+  ["ant-busca", "ant-sit", "ant-tempo", "ant-tel"].forEach(function (id) {
+    var x = document.getElementById(id); if (x) x.addEventListener(id === "ant-busca" ? "input" : "change", desenharAntigos);
+  });
+  // ================= FINANÇAS =================
+  // Tabela `financas` (dados jsonb): {tipo:"lanc"} entrada/saída · {tipo:"fixa"} conta fixa · {tipo:"metas"} · {tipo:"fechamento"} (robô, dia 1)
+  // O clube vem pronto do robô (linha hub "financas"): até out/2026 da planilha, depois dos pagamentos confirmados.
+  var FIN_ENT = ["Artesanou", "Outras entradas", "Clube (já contado)"];
+  var FIN_SAI = ["Contas fixas", "Academia", "Cartão", "Assinaturas", "Outras saídas"];
+  var FIN_ORIGEM = { manual: "anotado por você", fixa: "conta fixa", mp: "extrato Mercado Pago", nubank: "extrato Nubank", fatura: "fatura do cartão", outro: "extrato de outro banco" };
+  var MESES_NOME = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+  function rs(v) { return (+v || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" }); }
+  function isoDia(d) { return d.getFullYear() + "-" + ("0" + (d.getMonth() + 1)).slice(-2) + "-" + ("0" + d.getDate()).slice(-2); }
+  function mesAtual() { return isoDia(hoje()).slice(0, 7); }
+  function mesMais(m, n) { var p = m.split("-"), d = new Date(+p[0], +p[1] - 1 + n, 1); return isoDia(d).slice(0, 7); }
+  function nomeMes(m) { var p = m.split("-"); return MESES_NOME[+p[1] - 1] + "/" + p[0]; }
+  function diaBR(iso) { return iso ? iso.slice(8, 10) + "/" + iso.slice(5, 7) : ""; }
+  function finNum(v) {
+    if (typeof v === "number") return isFinite(v) ? v : null;
+    var s = String(v == null ? "" : v).trim();
+    if (!s || !/\d/.test(s) || /[a-df-qs-z]/i.test(s.replace(/r\$|brl|reais/ig, ""))) return null;
+    var neg = /^\(.*\)$/.test(s) || /-\s*$/.test(s) || /^[^\d]*-/.test(s);
+    s = s.replace(/[^0-9.,]/g, "");
+    var c = s.lastIndexOf(","), p = s.lastIndexOf(".");
+    if (c >= 0 && p >= 0) s = c > p ? s.replace(/\./g, "").replace(",", ".") : s.replace(/,/g, "");
+    else if (c >= 0) s = (s.match(/,/g).length > 1) ? s.replace(/,/g, "") : s.replace(",", ".");
+    else if (p >= 0 && (s.match(/\./g).length > 1 || /\.\d{3}$/.test(s))) s = s.replace(/\./g, "");
+    var n = parseFloat(s);
+    return isNaN(n) ? null : (neg ? -n : n);
+  }
+  function finData(v) {
+    // Excel: a data pode vir à meia-noite UTC (21h do dia anterior no Brasil); somar 12h acerta o dia nos dois casos
+    if (v instanceof Date && !isNaN(v)) return isoDia(new Date(v.getTime() + 12 * 3600e3));
+    if (typeof v === "number" && v > 30000 && v < 60000) return isoDia(new Date(Math.round((v - 25569) * 86400e3) + 12 * 3600e3));
+    var s = String(v == null ? "" : v).trim(), m;
+    if ((m = s.match(/^(\d{4})-(\d{2})-(\d{2})/))) return m[1] + "-" + m[2] + "-" + m[3];
+    if ((m = s.match(/^(\d{4})(\d{2})(\d{2})/)) && +m[2] <= 12) return m[1] + "-" + m[2] + "-" + m[3];
+    if ((m = s.match(/^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{2,4})/))) {
+      var a = m[3].length === 2 ? "20" + m[3] : m[3];
+      if (+m[2] > 12 || +m[1] > 31) return null;
+      return a + "-" + ("0" + m[2]).slice(-2) + "-" + ("0" + m[1]).slice(-2);
+    }
+    return null;
+  }
+  function finLinhas(tipo) { return state.fin.linhas.filter(function (x) { return x.tipo === tipo; }); }
+  function finMetas() { return finLinhas("metas")[0] || null; }
+  function fixaVale(f, m) { return (!f.desde || f.desde <= m) && (!f.ate || f.ate >= m); }
+  function diaVence(f, m) { var p = m.split("-"), ult = new Date(+p[0], +p[1], 0).getDate(); return new Date(+p[0], +p[1] - 1, Math.min(+f.dia || 1, ult)); }
+  // mesma regra do robô (financas.calcular_fechamento): Ignorar e Pix do clube não somam; se a fatura de um cartão
+  // foi importada item por item no mês, o "pagamento de fatura" do extrato DESSE banco não soma de novo
+  function finConta(x, temFatura) {
+    if (x.cat === "Ignorar" || x.cat === "Clube (já contado)") return false;
+    if (x.cat === "Cartão" && x.origem !== "fatura" && temFatura[x.origem] && /fatura/i.test(x.desc || "")) return false;
+    return true;
+  }
+  function finCalc(m) {
+    var lanc = finLinhas("lanc").filter(function (x) { return x.mes === m; });
+    var temFatura = {};
+    lanc.forEach(function (x) { if (x.origem === "fatura" && x.cat !== "Ignorar" && x.cartao) temFatura[x.cartao] = 1; });
+    var clube = (state.fin.clube || []).filter(function (c) { return c.mes === m; })[0] || null;
+    var porCat = {}, ent = 0, sai = 0;
+    if (clube && clube.valor) { porCat.Clube = clube.valor; ent += clube.valor; }
+    lanc.forEach(function (x) {
+      x._conta = finConta(x, temFatura);
+      if (!x._conta) return;
+      var v = Math.abs(+x.valor || 0);
+      if (x.sentido === "entrada") ent += v; else sai += v;
+      porCat[x.cat || "?"] = (porCat[x.cat || "?"] || 0) + v;
+    });
+    var fixas = finLinhas("fixa").filter(function (f) { return fixaVale(f, m); }).map(function (f) {
+      return { f: f, pago: lanc.filter(function (x) { return x.fixa_id === f.id; })[0] || null, vence: diaVence(f, m) };
+    }).sort(function (a, b) { return a.vence - b.vence; });
+    var apagar = fixas.filter(function (x) { return !x.pago; }).reduce(function (s, x) { return s + (+x.f.valor || 0); }, 0);
+    return { m: m, lanc: lanc, clube: clube, porCat: porCat, entrou: ent, saiu: sai, fechou: ent - sai, fixas: fixas, apagar: apagar };
+  }
+  function finAvisos() {                    // contas fixas sem "Paguei": vencidas ou vencendo nos próximos 5 dias (este mês e o próximo)
+    var h = hoje(), out = [];
+    [mesAtual(), mesMais(mesAtual(), 1)].forEach(function (m) {
+      finCalc(m).fixas.forEach(function (x) {
+        if (x.pago) return;
+        var dias = Math.round((x.vence - h) / 864e5);
+        if (dias <= 5 && (m === mesAtual() || dias >= 0)) out.push({ f: x.f, m: m, dias: dias, vence: x.vence });
+      });
+    });
+    return out;
+  }
+  function quandoVence(d) { return d < 0 ? "VENCIDA há " + (-d) + (d === -1 ? " dia" : " dias") : d === 0 ? "vence HOJE" : d === 1 ? "vence amanhã" : "vence em " + d + " dias"; }
+  function finMeses() {
+    var s = {}; s[mesAtual()] = 1;
+    (state.fin.clube || []).forEach(function (c) { s[c.mes] = 1; });
+    finLinhas("lanc").forEach(function (x) { if (x.mes) s[x.mes] = 1; });
+    return Object.keys(s).sort().reverse();
+  }
+  function opcoesCat(sentido, atual, comFixas) {
+    var l = sentido === "entrada" ? FIN_ENT : FIN_SAI;
+    var h = l.map(function (c) { return '<option value="' + esc(c) + '"' + (c === atual ? " selected" : "") + ">" + esc(c) + "</option>"; }).join("");
+    if (comFixas) h += finLinhas("fixa").filter(function (f) { return fixaVale(f, mesAtual()); }).map(function (f) {
+      return '<option value="fixa:' + esc(f.id) + '"' + (atual === "fixa:" + f.id ? " selected" : "") + ">Conta fixa: " + esc(f.nome) + "</option>"; }).join("");
+    return h + '<option value="Ignorar"' + (atual === "Ignorar" ? " selected" : "") + ">Ignorar (não conta)</option>";
+  }
+
+  function desenharFinancas() {
+    var sec = document.querySelector('[data-view="financas"]');
+    if (!sec) return;
+    var F = state.fin, meses = finMeses();
+    if (!F.mes || meses.indexOf(F.mes) < 0) F.mes = mesAtual();
+    var sel = el("fin-mes"), opts = meses.map(function (m) { return '<option value="' + m + '"' + (m === F.mes ? " selected" : "") + ">" + nomeMes(m) + "</option>"; }).join("");
+    if (sel.getAttribute("data-o") !== opts) { sel.innerHTML = opts; sel.setAttribute("data-o", opts); }
+    var fxm = el("fx-mes"), o2 = [mesMais(mesAtual(), 1), mesAtual(), mesMais(mesAtual(), -1), mesMais(mesAtual(), -2)].map(function (m) { return '<option value="' + m + '">' + nomeMes(m) + "</option>"; }).join("");
+    if (fxm.getAttribute("data-o") !== o2) { fxm.innerHTML = o2; fxm.value = mesAtual(); fxm.setAttribute("data-o", o2); }
+    var av = el("fin-aviso");
+    av.hidden = F.ok !== false;
+    av.innerHTML = F.ok === false ? "Falta um passo para poder anotar: no Supabase, rode o arquivo <b>MEUS ARQUIVOS › FINANÇAS › 1 - criar_financas.sql</b>. Até lá, só a receita do clube aparece." : "";
+    var c = finCalc(F.mes);
+
+    // quadros do topo
+    el("fin-kpis").innerHTML =
+      '<div class="kpi k-mint"><div class="rot">Entrou</div><div class="linha"><span class="num">' + rs(c.entrou) + '</span></div><span class="sub">clube + Artesanou + outras</span></div>' +
+      '<div class="kpi k-blush"><div class="rot">Saiu</div><div class="linha"><span class="num">' + rs(c.saiu) + '</span></div><span class="sub">tudo que você pagou</span></div>' +
+      '<div class="kpi k-lav"><div class="rot">' + (F.mes === mesAtual() ? "Até agora fechou em" : "Fechou em") + '</div><div class="linha"><span class="num">' + rs(c.fechou) + '</span></div><span class="sub">' + (c.fechou >= 0 ? "sobrou" : "faltou") + "</span></div>" +
+      '<div class="kpi k-butter"><div class="rot">Contas fixas a pagar</div><div class="linha"><span class="num">' + rs(c.apagar) + '</span></div><span class="sub">' +
+        (c.apagar ? "se pagar tudo, fecha em " + rs(c.fechou - c.apagar) : "nenhuma faltando") + "</span></div>";
+
+    // avisos de vencimento (sempre do mês de hoje)
+    var avs = finAvisos();
+    el("fin-avisos-cartao").hidden = !avs.length;
+    el("fin-avisos").innerHTML = avs.map(function (a) {
+      return '<li><a href="#financas" data-fin-ir="' + a.m + '"><span class="ponto" style="background:' + (a.dias < 0 ? "var(--blush-ink)" : "var(--butter-ink)") + '"></span><span><b>' + esc(a.f.nome) + "</b> · " + rs(a.f.valor) +
+        " · " + quandoVence(a.dias) + " (" + fmt(a.vence).slice(0, 5) + ')</span><span class="seta">›</span></a></li>'; }).join("");
+
+    // lista do mês
+    var ents = c.lanc.filter(function (x) { return x.sentido === "entrada"; }), sais = c.lanc.filter(function (x) { return x.sentido !== "entrada"; });
+    tabs("fin-tabs", [["tudo", "Tudo", c.lanc.length + (c.clube ? 1 : 0)], ["entrada", "Entradas", ents.length + (c.clube ? 1 : 0)], ["saida", "Saídas", sais.length]], F.filtro, function (f) { F.filtro = f; desenharFinancas(); });
+    var mostrar = c.lanc.filter(function (x) { return F.filtro === "tudo" || (F.filtro === "entrada") === (x.sentido === "entrada"); })
+      .sort(function (a, b) { return String(b.data).localeCompare(String(a.data)) || String(b.registrado_em || "").localeCompare(String(a.registrado_em || "")); });
+    var linhaClube = c.clube && c.clube.valor && F.filtro !== "saida" ? "<tr><td>mês todo</td><td><div class='nome'>Clube Mascatinho</div><div class='sub'>" + c.clube.n + " pagamentos · " +
+      (c.clube.fonte === "planilha" ? "da planilha" : "pagamentos confirmados") + "</div></td><td><span class='chip s-ok'>Clube</span></td><td class='v-ent'>+ " + rs(c.clube.valor) + "</td><td></td></tr>" : "";
+    el("fin-lancs").innerHTML = (linhaClube || mostrar.length) ? "<table><thead><tr><th>Dia</th><th>O que foi</th><th>Tipo</th><th>Valor</th><th></th></tr></thead><tbody>" + linhaClube +
+      mostrar.map(function (x) {
+        var e = x.sentido === "entrada";
+        return "<tr" + (x._conta ? "" : " class='fin-nao'") + "><td>" + esc(diaBR(x.data)) + "</td><td><div class='nome'>" + esc(x.desc || "(sem descrição)") + "</div><div class='sub'>" +
+          esc((FIN_ORIGEM[x.origem] || x.origem || "") + (x.cartao ? (x.cartao === "mp" ? " Mercado Pago" : " Nubank") : "")) +
+          (x._conta ? "" : x.cat === "Cartão" ? " · não entra na conta (a fatura já está item por item)" : " · não entra na conta") + "</div></td><td><span class='chip " + (e ? "s-ok" : "s-lanc") + "'>" + esc(x.cat || "?") + "</span></td>" +
+          "<td class='" + (e ? "v-ent'>+ " : "v-sai'>− ") + rs(Math.abs(x.valor)) + "</td><td style='text-align:right'>" +
+          (state.podeEscrever ? "<button class='icon-btn' type='button' title='Apagar este lançamento' aria-label='Apagar' data-fin-apagar='" + esc(x.id) + "'><svg viewBox='0 0 24 24'><path d='M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13'/></svg></button>" : "") + "</td></tr>";
+      }).join("") + "</tbody></table>" : '<p class="vazio">Nada lançado em ' + nomeMes(F.mes) + '. Use <b>Lançar</b> ou <b>Arrastar extrato</b>.</p>';
+
+    // contas fixas
+    el("fin-fixas").innerHTML = c.fixas.length ? "<table><thead><tr><th>Conta</th><th>Vence</th><th>Valor</th><th></th></tr></thead><tbody>" + c.fixas.map(function (x) {
+      var dias = Math.round((x.vence - hoje()) / 864e5);
+      var st = x.pago ? "<span class='chip s-ok'>Paga " + esc(diaBR(x.pago.data)) + "</span>" : (F.mes <= mesAtual() || dias <= 5 ? "<span class='chip " + (dias < 0 ? "s-atraso" : dias <= 5 ? "s-venc" : "s-conf") + "'>" + quandoVence(dias) + "</span>" : "");
+      return "<tr><td><div class='nome'>" + esc(x.f.nome) + "</div><div class='sub'>" + esc(x.f.cat) + "</div></td><td>dia " + esc(x.f.dia) + "<div>" + st + "</div></td>" +
+        "<td>" + (x.pago ? "<span class='v-sai'>− " + rs(x.pago.valor) + "</span>" : "<input class='fin-valor-in' inputmode='decimal' aria-label='Valor de " + esc(x.f.nome) + "' id='fv-" + esc(x.f.id) + "' value='" + esc((+x.f.valor || 0).toFixed(2).replace(".", ",")) + "'>") + "</td>" +
+        "<td style='text-align:right;white-space:nowrap'>" + (!state.podeEscrever ? "" : x.pago ? "<button class='btn btn-ghost' type='button' data-fin-apagar='" + esc(x.pago.id) + "'>Desfazer</button>"
+          : "<button class='btn btn-brand' type='button' data-fin-paguei='" + esc(x.f.id) + "'>Paguei</button> <button class='icon-btn' type='button' title='Parar esta conta (não aparece mais a partir deste mês)' aria-label='Parar esta conta' data-fin-parar='" + esc(x.f.id) + "'><svg viewBox='0 0 24 24'><path d='M6 6l12 12M18 6L6 18'/></svg></button>") + "</td></tr>";
+    }).join("") + "</tbody></table>" : '<p class="vazio">Nenhuma conta fixa ainda. Use <b>Nova conta fixa</b> (academia, luz, internet, assinaturas…).</p>';
+
+    // metas
+    var mt = finMetas() || {};
+    function barra(rot, atual, meta, tipo) {
+      if (!meta) return "";
+      var pct = Math.max(0, Math.min(100, atual / meta * 100)), txt, cls;
+      if (tipo === "gastar") { cls = atual > meta ? "ruim" : "ok"; txt = atual > meta ? "passou " + rs(atual - meta) + " do limite" : "ainda pode gastar " + rs(meta - atual); }
+      else { cls = atual >= meta ? "ok" : ""; txt = atual >= meta ? "✔ meta batida!" : "faltam " + rs(meta - Math.max(atual, 0)); }
+      return '<div class="fin-meta"><div class="rotulo"><span>' + rot + "</span><span>" + rs(atual) + " de " + rs(meta) + '</span></div><div class="fin-trilho"><i class="' + cls + '" style="width:' + pct.toFixed(1) + '%"></i></div><span class="sub">' + txt + "</span></div>";
+    }
+    var mh = barra("Faturar no mínimo", c.entrou, +mt.faturar, "faturar") + barra("Gastar no máximo", c.saiu, +mt.gastar, "gastar") + barra("Guardar", c.fechou, +mt.guardar, "guardar");
+    el("fin-metas").innerHTML = mh || '<p class="vazio">Sem metas ainda. Clique em <b>Mudar</b> para colocar.</p>';
+    if (el("fin-form-metas").hidden) {
+      el("fm-faturar").value = mt.faturar ? String(mt.faturar).replace(".", ",") : "";
+      el("fm-gastar").value = mt.gastar ? String(mt.gastar).replace(".", ",") : "";
+      el("fm-guardar").value = mt.guardar ? String(mt.guardar).replace(".", ",") : "";
+    }
+
+    // por tipo
+    function cats(lista, cor) {
+      var tot = lista.reduce(function (s, k) { return s + c.porCat[k]; }, 0) || 1;
+      return lista.sort(function (a, b) { return c.porCat[b] - c.porCat[a]; }).map(function (k) {
+        return '<div class="fin-cat"><span>' + esc(k) + "</span><b>" + rs(c.porCat[k]) + '</b><div class="fin-trilho"><i style="width:' + (c.porCat[k] / tot * 100).toFixed(1) + "%;background:" + cor + '"></i></div></div>'; }).join("");
+    }
+    var ke = Object.keys(c.porCat).filter(function (k) { return k === "Clube" || FIN_ENT.indexOf(k) >= 0; }), ks = Object.keys(c.porCat).filter(function (k) { return ke.indexOf(k) < 0; });
+    el("fin-cats").innerHTML = (ke.length ? '<div class="fin-sub-tit">Entradas</div>' + cats(ke, "var(--mint-ink)") : "") + (ks.length ? '<div class="fin-sub-tit">Saídas</div>' + cats(ks, "var(--blush-ink)") : "") ||
+      '<p class="vazio">Nada neste mês ainda.</p>';
+
+    // clube
+    var cl = c.clube;
+    el("fin-clube").innerHTML = !F.clube ? '<p class="vazio">O robô ainda não mandou a receita do clube. Espere uns minutos.</p>' : !cl ? '<p class="vazio">Nenhum pagamento do clube em ' + nomeMes(F.mes) + ".</p>" :
+      cl.valor == null ? '<p class="vazio">A planilha deste mês está sem valores.</p>' :
+      "<p><b>" + rs(cl.valor) + "</b> de " + cl.n + " pagamentos <span class='sub'>(" + (cl.fonte === "planilha" ? "da planilha" : "pagamentos confirmados") + ")</span></p>" +
+      (cl.planos ? '<ul class="legenda">' + Object.keys(cl.planos).map(function (p) { return "<li>" + esc(cap(p)) + " <b>" + cl.planos[p] + "</b></li>"; }).join("") + "</ul>" : "") +
+      (cl.itens && cl.itens.length ? '<div class="rolar" style="max-height:260px;margin-top:10px"><table><tbody>' + cl.itens.slice().sort(function (a, b) { return String(b.data).localeCompare(String(a.data)); }).map(function (i) {
+        return "<tr><td>" + esc(diaBR(i.data || "")) + "</td><td>" + esc(i.nome) + "<div class='sub'>" + esc(cap(i.plano || "")) + (i.sem_valor ? " · valor do plano" : "") + "</div></td><td class='v-ent'>" + rs(i.valor) + "</td></tr>"; }).join("") + "</tbody></table></div>" : "");
+
+    // meses antigos
+    var fech = {}; finLinhas("fechamento").forEach(function (x) { fech[x.mes] = x; });
+    el("fin-meses").innerHTML = "<table><thead><tr><th>Mês</th><th>Entrou</th><th>Saiu</th><th>Fechou em</th></tr></thead><tbody>" + meses.map(function (m) {
+      var k = finCalc(m), tem = k.lanc.length > 0;
+      return "<tr><td><a href='#financas' data-fin-ir='" + m + "' style='color:inherit;font-weight:700'>" + nomeMes(m) + "</a>" + (fech[m] ? "<div class='sub'>✔ fechamento guardado</div>" : m === mesAtual() ? "<div class='sub'>mês em andamento</div>" : "") + "</td>" +
+        "<td class='v-ent'>" + (k.clube && k.clube.valor == null && !tem ? "<span class='sub'>sem valor</span>" : rs(k.entrou)) + "</td><td>" + (tem ? "<span class='v-sai'>" + rs(k.saiu) + "</span>" : "<span class='sub'>—</span>") + "</td>" +
+        "<td><b>" + (tem ? rs(k.fechou) : "—") + "</b></td></tr>"; }).join("") + "</tbody></table>";
+
+    // aviso no Painel (Próximas ações)
+    var prox = el("proximas"), velho = prox && prox.querySelector("[data-fin-prox]");
+    if (velho) velho.remove();
+    if (prox && avs.length) {
+      var venc = avs.filter(function (a) { return a.dias < 0; }).length;
+      prox.insertAdjacentHTML("afterbegin", '<li data-fin-prox="1"><a href="#financas"><span class="ponto" style="background:' + (venc ? "var(--blush-ink)" : "var(--butter-ink)") + '"></span><span><b>' + avs.length + "</b> " +
+        (avs.length === 1 ? "conta fixa" : "contas fixas") + (venc ? " (" + venc + " vencida" + (venc > 1 ? "s" : "") + ")" : "") + ' para pagar logo</span><span class="seta">›</span></a></li>');
+    }
+  }
+
+  // ----- leitura do extrato (CSV / Excel / OFX) -----
+  function finCSV(txt) {
+    txt = txt.replace(/^﻿/, "");
+    var amostra = txt.split(/\r?\n/).slice(0, 15);
+    function conta(ch) { return amostra.reduce(function (s, l) { return s + l.split(ch).length - 1; }, 0); }
+    var sep = [";", "\t", ","].sort(function (a, b) { return conta(b) - conta(a); })[0];
+    var out = [], row = [], cel = "", q = false;
+    for (var i = 0; i < txt.length; i++) {
+      var ch = txt[i];
+      if (q) { if (ch === '"') { if (txt[i + 1] === '"') { cel += '"'; i++; } else q = false; } else cel += ch; }
+      else if (ch === '"') q = true;
+      else if (ch === sep) { row.push(cel); cel = ""; }
+      else if (ch === "\n" || ch === "\r") { if (ch === "\r" && txt[i + 1] === "\n") i++; row.push(cel); out.push(row); row = []; cel = ""; }
+      else cel += ch;
+    }
+    if (cel || row.length) { row.push(cel); out.push(row); }
+    return out;
+  }
+  function finOFX(txt) {
+    return txt.split(/<STMTTRN>/i).slice(1).map(function (b) {
+      function tag(t) { var m = b.match(new RegExp("<" + t + ">([^<\\r\\n]*)", "i")); return m ? m[1].trim() : ""; }
+      return { data: finData(tag("DTPOSTED")), valor: finNum(tag("TRNAMT").replace(",", ".")), desc: tag("MEMO") || tag("NAME") };
+    }).filter(function (r) { return r.data && r.valor; });
+  }
+  function finTabela(rows) {
+    function n(x) { return semAcento(String(x == null ? "" : x)).toLowerCase().trim(); }
+    var H = -1, cD = -1, cV = -1, cT = -1, cC = -1, cB = -1;
+    for (var i = 0; i < Math.min(rows.length, 40) && H < 0; i++) {
+      var r = rows[i].map(n), d = -1, v = [], t = -1, cr = -1, db = -1;
+      r.forEach(function (x, j) {
+        if (d < 0 && /^(data|date|fecha|dt)\b|release_date|data (da|de|do) |data_/.test(x)) d = j;
+        else if (/valor|amount|value|montante|quantia|importe/.test(x) && !/saldo|balance|partial|bruto|gross|tarifa|fee/.test(x)) v.push(j);
+        else if (t < 0 && /descri|title|titulo|transaction_type|historico|detalhe|lancamento|estabelecimento|memo|^nome|operacao|tipo de/.test(x)) t = j;
+        else if (/^credito|^entrada/.test(x)) cr = j;
+        else if (/^debito|^saida/.test(x)) db = j;
+      });
+      if (d >= 0 && (v.length || (cr >= 0 && db >= 0))) {
+        H = i; cD = d; cT = t; cC = cr; cB = db;
+        var liq = v.filter(function (j) { return /net|liquid/.test(r[j]); });
+        cV = liq.length ? liq[0] : (v.length ? v[0] : -1);
+      }
+    }
+    var out = [];
+    if (H >= 0) {
+      rows.slice(H + 1).forEach(function (r) {
+        var data = finData(r[cD]); if (!data) return;
+        var valor = cV >= 0 ? finNum(r[cV]) : (finNum(r[cC]) || 0) - Math.abs(finNum(r[cB]) || 0);
+        if (!valor) return;
+        var desc = cT >= 0 ? r[cT] : r.filter(function (x, j) { return j !== cD && j !== cV && finNum(x) == null; }).join(" ");
+        out.push({ data: data, valor: valor, desc: String(desc || "").trim() });
+      });
+      return out;
+    }
+    rows.forEach(function (r) {                                    // sem cabeçalho: 1ª data, 1º número, texto mais comprido
+      var data = null, valor = null, desc = "";
+      r.forEach(function (x) {
+        if (!data && finData(x)) { data = finData(x); return; }
+        if (valor == null && typeof x !== "object" && /[.,]\d{2}\s*-?\)?\s*$|^-?\d+$/.test(String(x).trim()) && finNum(x) != null) { valor = finNum(x); return; }
+        if (String(x).length > desc.length && finNum(x) == null) desc = String(x);
+      });
+      if (data && valor) out.push({ data: data, valor: valor, desc: desc.trim() });
+    });
+    return out;
+  }
+  function carregarXLSX() {
+    return window.XLSX ? Promise.resolve() : new Promise(function (ok, erro) {
+      var s = document.createElement("script"); s.src = "https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"; s.onload = ok; s.onerror = erro; document.head.appendChild(s); });
+  }
+  function finLerArquivo(arq) {
+    var nome = arq.name.toLowerCase();
+    if (/\.pdf$/.test(nome)) return Promise.reject(new Error("PDF eu ainda não sei ler. No app do banco, baixe em Excel, CSV ou OFX. (Se só tiver PDF, mande o arquivo para o Claude ensinar o painel.)"));
+    return arq.arrayBuffer().then(function (buf) {
+      if (/\.xlsx?$/.test(nome)) return carregarXLSX().then(function () {
+        var wb = window.XLSX.read(buf, { type: "array", cellDates: true }), melhor = [];
+        wb.SheetNames.forEach(function (sn) { var r = finTabela(window.XLSX.utils.sheet_to_json(wb.Sheets[sn], { header: 1, raw: true, defval: "" })); if (r.length > melhor.length) melhor = r; });
+        return melhor;
+      });
+      var txt = new TextDecoder("utf-8").decode(buf);
+      if (txt.indexOf("�") >= 0) txt = new TextDecoder("windows-1252").decode(buf);
+      return /<STMTTRN>/i.test(txt) ? finOFX(txt) : finTabela(finCSV(txt));
+    });
+  }
+  function finChave(data, valor, desc) { return data + "|" + Math.abs(valor).toFixed(2) + "|" + (valor < 0 ? "-" : "+") + "|" + normal(desc).slice(0, 40); }
+  function finSugerir(r, fonte, valoresClube) {
+    var d = semAcento(r.desc).toLowerCase(), ent = r.valor > 0;
+    if (/^fatura/.test(fonte)) {                                   // na fatura, compra vem positiva; pagamento/estorno vem negativo
+      if (r.valor > 0) return { sentido: "saida", cat: "Cartão" };
+      return { sentido: "entrada", cat: "Ignorar" };
+    }
+    // dinheiro que só muda de lugar (entre as contas dela, cofrinho, investimento) não é entrada nem gasto
+    if (/viviane|prateano|reserva|cofrinho|caixinha|aplicac|resgate|investimento/.test(d)) return { sentido: ent ? "entrada" : "saida", cat: "Ignorar" };
+    if (ent) {
+      if (/artesanou/.test(d) || (fonte === "mp" && /libera|venda|pagamento recebido|recebimento/.test(d) && !/pix/.test(d))) return { sentido: "entrada", cat: "Artesanou" };
+      if (valoresClube[Math.round(r.valor * 100)]) return { sentido: "entrada", cat: "Clube (já contado)" };
+      return { sentido: "entrada", cat: "Outras entradas" };
+    }
+    var fx = finLinhas("fixa").filter(function (f) { return fixaVale(f, mesAtual()) && normal(f.nome) && normal(r.desc).indexOf(normal(f.nome)) >= 0; })[0];
+    if (fx) return { sentido: "saida", cat: "fixa:" + fx.id };
+    if (/fatura|cartao de credito/.test(d)) return { sentido: "saida", cat: "Cartão" };
+    if (/academia|smart ?fit|bluefit|selfit|fitness|gym|crossfit|pilates/.test(d)) return { sentido: "saida", cat: "Academia" };
+    if (/netflix|spotify|google|canva|claude|anthropic|netlify|apple|icloud|prime|youtube|disney|globoplay|adobe|microsoft|deezer|hbo|\bmax\b|chatgpt|openai|capcut|assinatura/.test(d)) return { sentido: "saida", cat: "Assinaturas" };
+    if (/\bluz\b|energia|enel|cpfl|cemig|copel|coelba|celpe|light|sabesp|agua|saneamento|internet|vivo|claro|\btim\b|\boi\b|aluguel|condominio|\bgas\b|iptu/.test(d)) return { sentido: "saida", cat: "Contas fixas" };
+    return { sentido: "saida", cat: "Outras saídas" };
+  }
+  function finPrevia(linhas, fonte) {
+    var vc = { 1000: 1 };                                          // R$10 (1º mês) + todos os valores que as clientes pagam
+    Object.keys((state.base && state.base.precos) || {}).forEach(function (k) { vc[Math.round(state.base.precos[k] * 100)] = 1; });
+    ((state.base && state.base.clientes) || []).forEach(function (c) { if (c.valor) vc[Math.round(c.valor * 100)] = 1; });
+    var ja = {}, visto = {};
+    finLinhas("lanc").forEach(function (x) { if (x.chave) ja[x.chave] = 1; });
+    var mesF = el("fx-mes").value;
+    state.fin.previa = { fonte: fonte, itens: linhas.map(function (r) {
+      var k = finChave(r.data, r.valor, r.desc); visto[k] = (visto[k] || 0) + 1; k += "#" + visto[k];
+      var s = finSugerir(r, fonte, vc);
+      return { data: r.data, valor: r.valor, desc: r.desc, chave: k, ja: !!ja[k], usar: !ja[k], sentido: s.sentido, cat: s.cat, mes: /^fatura/.test(fonte) ? mesF : r.data.slice(0, 7) };
+    }) };
+    desenharPrevia();
+  }
+  function desenharPrevia() {
+    var P = state.fin.previa, box = el("fx-previa");
+    if (!P) { box.innerHTML = ""; return; }
+    var novos = P.itens.filter(function (x) { return x.usar; });
+    var soma = function (s) { return novos.filter(function (x) { return x.sentido === s && x.cat !== "Ignorar" && x.cat !== "Clube (já contado)"; }).reduce(function (a, x) { return a + Math.abs(x.valor); }, 0); };
+    box.innerHTML = '<p><b>' + P.itens.length + "</b> linhas no arquivo · <b>" + novos.length + "</b> para salvar" + (P.itens.length - novos.length ? " · " + (P.itens.length - novos.length) + " já lançadas ou desmarcadas" : "") +
+      " · entradas <span class='v-ent'>" + rs(soma("entrada")) + "</span> · saídas <span class='v-sai'>" + rs(soma("saida")) + "</span></p>" +
+      '<div class="rolar" style="max-height:420px"><table><thead><tr><th></th><th>Dia</th><th>O que foi</th><th>Valor</th><th>Tipo</th></tr></thead><tbody>' + P.itens.map(function (x, i) {
+        var e = x.sentido === "entrada";
+        return "<tr" + (x.usar ? "" : " class='fin-nao'") + "><td><input type='checkbox' aria-label='Salvar esta linha' data-fx-usar='" + i + "'" + (x.usar ? " checked" : "") + "></td><td>" + esc(diaBR(x.data)) + "</td><td>" + esc(x.desc) +
+          (x.ja ? "<div class='sub'>já está lançado</div>" : "") + "</td><td class='" + (e ? "v-ent'>+ " : "v-sai'>− ") + rs(Math.abs(x.valor)) + "</td>" +
+          "<td><select class='fin-sel' aria-label='Tipo' data-fx-cat='" + i + "'>" + opcoesCat(x.sentido, x.cat, !e) + "</select></td></tr>"; }).join("") + "</tbody></table></div>" +
+      '<div class="form-fim" style="margin-top:12px"><button class="btn btn-brand" type="button" id="fx-salvar"' + (novos.length && state.fin.ok ? "" : " disabled") + ">Salvar " + novos.length + " lançamentos</button>" +
+      '<button class="btn btn-ghost" type="button" id="fx-cancelar">Cancelar</button>' + (state.fin.ok === false ? '<span class="msg erro">Primeiro rode o arquivo criar_financas.sql no Supabase.</span>' : "") + "</div>";
+  }
+
+  // ----- gravar no banco -----
+  function finGravar(docs) {
+    var lotes = [];
+    for (var i = 0; i < docs.length; i += 200) lotes.push(docs.slice(i, i + 200));
+    return lotes.reduce(function (pr, l) {
+      return pr.then(function () { return SB.from("financas").insert(l.map(function (d) { return { dados: d }; })).then(function (r) { if (r.error) throw r.error; }); });
+    }, Promise.resolve()).then(carregarFin);
+  }
+  function finApagar(id) { return SB.from("financas").delete().eq("id", id).then(function (r) { if (r.error) throw r.error; return carregarFin(); }); }
+  function finMudar(id, dados) { return SB.from("financas").update({ dados: dados }).eq("id", id).then(function (r) { if (r.error) throw r.error; return carregarFin(); }); }
+  function semId(x) { var d = Object.assign({}, x); delete d.id; delete d._conta; return d; }
+  function carregarFin() {
+    var todas = [];
+    function pagina(de) {
+      return SB.from("financas").select("id,dados").order("criado", { ascending: true }).range(de, de + 999).then(function (r) {
+        if (r.error) { if (/does not exist|relation|schema cache|not find/i.test(r.error.message || "")) state.fin.ok = false; return; }
+        state.fin.ok = true;
+        todas = todas.concat((r.data || []).map(function (x) { return Object.assign({ id: x.id }, x.dados); }));
+        if ((r.data || []).length === 1000) return pagina(de + 1000);
+        state.fin.linhas = todas;
+      });
+    }
+    var a = pagina(0);
+    var b = SB.from("hub").select("dados").eq("id", "financas").maybeSingle().then(function (r) { if (!r.error && r.data) state.fin.clube = r.data.dados.clube || []; });
+    function talvezDesenhar() {                 // a cada minuto o painel recarrega: só redesenha se algo mudou (não apaga o que ela está digitando)
+      var sig = state.fin.ok + "|" + JSON.stringify(state.fin.linhas) + "|" + JSON.stringify(state.fin.clube);
+      if (sig !== state.fin.sig) { state.fin.sig = sig; desenharFinancas(); }
+    }
+    return Promise.all([a, b]).then(talvezDesenhar, talvezDesenhar);
+  }
+  function msg(id, t, ok) { var m = el(id); m.textContent = t; m.className = "msg " + (ok ? "ok" : "erro"); }
+  function erroTxt(e) { return state.fin.ok === false ? "Primeiro rode o arquivo criar_financas.sql no Supabase." : "Não salvou (" + ((e && e.message) || "sem internet?") + ")."; }
+
+  // ----- botões e formulários -----
+  el("fl-sentido").addEventListener("change", function () {
+    el("fl-cat").innerHTML = (this.value === "entrada" ? FIN_ENT.slice(0, 2) : FIN_SAI).map(function (c) { return '<option value="' + esc(c) + '">' + esc(c) + "</option>"; }).join("");
+  });
+  el("ff-cat").innerHTML = FIN_SAI.map(function (c) { return '<option value="' + esc(c) + '">' + esc(c) + "</option>"; }).join("");
+  el("fin-mes").addEventListener("change", function () { state.fin.mes = this.value; desenharFinancas(); });
+  el("fx-fonte").addEventListener("change", function () { el("fx-mes-rot").hidden = !/^fatura/.test(this.value); });
+  function abrirCaixa(qual) {
+    ["lancar", "fixa", "extrato"].forEach(function (k) { el("fin-caixa-" + k).hidden = k !== qual; });
+    if (qual === "lancar") {
+      el("fl-sentido").dispatchEvent(new Event("change"));
+      el("fl-data").value = state.fin.mes === mesAtual() ? isoDia(hoje()) : state.fin.mes + "-01";
+      setTimeout(function () { el("fl-desc").focus(); }, 0);
+    }
+    if (qual === "fixa") setTimeout(function () { el("ff-nome").focus(); }, 0);
+    if (qual) el("fin-caixa-" + qual).scrollIntoView({ block: "nearest" });
+  }
+  document.querySelector('[data-view="financas"]').addEventListener("click", function (ev) {
+    var t = ev.target.closest("[data-fin-abrir],[data-fin-fechar],[data-fin-apagar],[data-fin-paguei],[data-fin-parar],[data-fin-ir],#fx-salvar,#fx-cancelar");
+    if (!t) return;
+    if (t.hasAttribute("data-fin-ir")) { ev.preventDefault(); ev.stopPropagation(); state.fin.mes = t.getAttribute("data-fin-ir"); desenharFinancas(); window.scrollTo(0, 0); return; }
+    if (t.hasAttribute("data-fin-abrir")) { var q = t.getAttribute("data-fin-abrir"); if (q === "metas") { el("fin-form-metas").hidden = !el("fin-form-metas").hidden; } else abrirCaixa(q); return; }
+    if (t.hasAttribute("data-fin-fechar")) { abrirCaixa(""); return; }
+    if (t.id === "fx-cancelar") { state.fin.previa = null; desenharPrevia(); el("fx-msg").textContent = ""; return; }
+    if (!state.podeEscrever) return;
+    if (t.hasAttribute("data-fin-apagar")) {
+      if (!confirm("Apagar este lançamento?")) return;
+      t.disabled = true; finApagar(t.getAttribute("data-fin-apagar")).catch(function (e) { t.disabled = false; alert(erroTxt(e)); }); return;
+    }
+    if (t.hasAttribute("data-fin-paguei")) {
+      var f = finLinhas("fixa").filter(function (x) { return x.id === t.getAttribute("data-fin-paguei"); })[0]; if (!f) return;
+      var v = finNum(el("fv-" + f.id).value); if (!v) { alert("Coloque o valor que você pagou."); return; }
+      var m = state.fin.mes, dia = m === mesAtual() ? isoDia(hoje()) : isoDia(diaVence(f, m));
+      t.disabled = true;
+      finGravar([{ tipo: "lanc", mes: m, data: dia, desc: f.nome, valor: Math.abs(v), sentido: "saida", cat: f.cat, origem: "fixa", fixa_id: f.id, registrado_em: new Date().toISOString() }])
+        .catch(function (e) { t.disabled = false; alert(erroTxt(e)); }); return;
+    }
+    if (t.hasAttribute("data-fin-parar")) {
+      var g = finLinhas("fixa").filter(function (x) { return x.id === t.getAttribute("data-fin-parar"); })[0]; if (!g) return;
+      if (!confirm("Parar a conta \"" + g.nome + "\"? Ela não aparece mais a partir de " + nomeMes(state.fin.mes) + " (os meses de antes ficam como estão).")) return;
+      t.disabled = true; finMudar(g.id, Object.assign(semId(g), { ate: mesMais(state.fin.mes, -1) })).catch(function (e) { t.disabled = false; alert(erroTxt(e)); }); return;
+    }
+    if (t.id === "fx-salvar") {
+      var P = state.fin.previa; if (!P) return;
+      var agora = new Date().toISOString();
+      var docs = P.itens.filter(function (x) { return x.usar; }).map(function (x) {
+        var fat = /^fatura_/.test(P.fonte);
+        var d = { tipo: "lanc", mes: x.mes, data: x.data, desc: x.desc, valor: Math.abs(x.valor), sentido: x.sentido, cat: x.cat, origem: fat ? "fatura" : P.fonte, chave: x.chave, registrado_em: agora };
+        if (fat) d.cartao = P.fonte.slice(7);                      // "mp" ou "nubank"
+        if (/^fixa:/.test(x.cat)) { var fx = finLinhas("fixa").filter(function (f) { return "fixa:" + f.id === x.cat; })[0]; d.cat = fx ? fx.cat : "Contas fixas"; d.fixa_id = fx ? fx.id : undefined; }
+        return d;
+      });
+      t.disabled = true; t.textContent = "Salvando…";
+      finGravar(docs).then(function () { state.fin.previa = null; desenharPrevia(); msg("fx-msg", "✔ " + docs.length + " lançamentos salvos.", true); })
+        .catch(function (e) { t.disabled = false; t.textContent = "Salvar"; msg("fx-msg", erroTxt(e), false); });
+    }
+  });
+  el("fx-previa").addEventListener("change", function (ev) {
+    var P = state.fin.previa; if (!P) return;
+    var u = ev.target.getAttribute("data-fx-usar"), c = ev.target.getAttribute("data-fx-cat");
+    if (u != null) P.itens[+u].usar = ev.target.checked;
+    if (c != null) P.itens[+c].cat = ev.target.value;
+    desenharPrevia();
+  });
+  function receberArquivo(arq) {
+    if (!arq) return;
+    msg("fx-msg", "Lendo " + arq.name + "…", true);
+    finLerArquivo(arq).then(function (linhas) {
+      if (!linhas.length) { msg("fx-msg", "Não achei nenhuma linha com dia e valor nesse arquivo. Mande o arquivo para o Claude ensinar o painel a ler esse formato.", false); return; }
+      msg("fx-msg", "", true);
+      finPrevia(linhas, el("fx-fonte").value);
+    }).catch(function (e) { msg("fx-msg", e.message || "Não consegui ler o arquivo.", false); });
+  }
+  el("fx-arquivo").addEventListener("change", function () { receberArquivo(this.files[0]); this.value = ""; });
+  var drop = el("fx-drop");
+  ["dragenter", "dragover"].forEach(function (n) { drop.addEventListener(n, function (ev) { ev.preventDefault(); drop.classList.add("em-cima"); }); });
+  ["dragleave", "drop"].forEach(function (n) { drop.addEventListener(n, function (ev) { ev.preventDefault(); drop.classList.remove("em-cima"); }); });
+  drop.addEventListener("drop", function (ev) { receberArquivo(ev.dataTransfer.files[0]); });
+  el("fin-form-lanc").addEventListener("submit", function (ev) {
+    ev.preventDefault();
+    var v = finNum(el("fl-valor").value), d = el("fl-data").value;
+    if (!v) { msg("fl-msg", "Coloque o valor.", false); return; }
+    el("fl-enviar").disabled = true;
+    finGravar([{ tipo: "lanc", mes: d.slice(0, 7), data: d, desc: el("fl-desc").value.trim(), valor: Math.abs(v), sentido: el("fl-sentido").value, cat: el("fl-cat").value, origem: "manual", registrado_em: new Date().toISOString() }])
+      .then(function () { msg("fl-msg", "✔ Salvo.", true); el("fl-desc").value = ""; el("fl-valor").value = ""; state.fin.mes = d.slice(0, 7); desenharFinancas(); })
+      .catch(function (e) { msg("fl-msg", erroTxt(e), false); }).then(function () { el("fl-enviar").disabled = false; });
+  });
+  el("fin-form-fixa").addEventListener("submit", function (ev) {
+    ev.preventDefault();
+    var v = finNum(el("ff-valor").value), dia = parseInt(el("ff-dia").value, 10);
+    if (!v || !(dia >= 1 && dia <= 31)) { msg("ff-msg", "Coloque o valor e o dia (1 a 31).", false); return; }
+    el("ff-enviar").disabled = true;
+    finGravar([{ tipo: "fixa", nome: el("ff-nome").value.trim(), valor: Math.abs(v), dia: dia, cat: el("ff-cat").value, desde: mesAtual(), registrado_em: new Date().toISOString() }])
+      .then(function () { msg("ff-msg", "✔ Cadastrada. Ela aparece em Contas fixas do mês.", true); el("ff-nome").value = ""; el("ff-valor").value = ""; el("ff-dia").value = ""; })
+      .catch(function (e) { msg("ff-msg", erroTxt(e), false); }).then(function () { el("ff-enviar").disabled = false; });
+  });
+  el("fin-form-metas").addEventListener("submit", function (ev) {
+    ev.preventDefault();
+    var d = { tipo: "metas", faturar: finNum(el("fm-faturar").value) || 0, gastar: finNum(el("fm-gastar").value) || 0, guardar: finNum(el("fm-guardar").value) || 0, mudou_em: new Date().toISOString() };
+    var atual = finMetas();
+    el("fm-enviar").disabled = true;
+    (atual ? finMudar(atual.id, d) : finGravar([d]))
+      .then(function () { msg("fm-msg", "✔ Metas salvas.", true); el("fin-form-metas").hidden = true; desenharFinancas(); })
+      .catch(function (e) { msg("fm-msg", erroTxt(e), false); }).then(function () { el("fm-enviar").disabled = false; });
+  });
+
+  document.getElementById("baixar-planilha").addEventListener("click", function () {
+    var b = this; b.disabled = true; b.textContent = "Preparando…";
+    SB.from("hub").select("dados").eq("id", "planilha_mes").maybeSingle().then(function (r) {
+      b.disabled = false; b.textContent = "Baixar planilha do mês";
+      var d = r.data && r.data.dados;
+      if (!d || !d.xlsx_base64) { el("planilha-info").textContent = "Ainda não tem planilha pronta. Tente em 15 minutos."; return; }
+      var bin = atob(d.xlsx_base64), u = new Uint8Array(bin.length);
+      for (var i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i);
+      var url = URL.createObjectURL(new Blob([u], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }));
+      var a = document.createElement("a"); a.href = url; a.download = d.nome; document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
+      el("planilha-info").textContent = d.nome + " · gerada " + d.gerada.slice(8, 10) + "/" + d.gerada.slice(5, 7) + " " + d.gerada.slice(11);
+    });
+  });
+  function carregar() {
+    carregarFin();
+    SB.from("hub").select("dados").eq("id", "antigos").maybeSingle().then(function (r) {
+      if (r.error || !r.data) { var t = document.getElementById("ant-tabela"); if (t) t.innerHTML = '<p class="vazio">Os robôs ainda não mandaram a lista. Espere uns minutos.</p>'; return; }
+      state.antigos = r.data.dados; desenharAntigos();
+    });
+    SB.from("hub").select("dados,atualizado").eq("id", "base").maybeSingle().then(function (r) {
+      if (r.error) { el("fresco").textContent = "Erro ao ler os dados"; return; }
+      state.base = r.data ? r.data.dados : null;
+      el("aviso").hidden = !!state.base;
+      if (!state.base) el("aviso").textContent = "Os robôs ainda não mandaram os dados. Espere uns minutos.";
+      render();
+    });
+    SB.from("remocoes").select("id,dados,importado").order("criado", { ascending: false }).limit(300).then(function (r) {
+      if (r.error) return;
+      state.remocoes = (r.data || []).map(function (x) { return Object.assign({ id: x.id }, x.dados); });
+      render();
+    });
+    Object.keys(TABELAS).forEach(function (t) {
+      SB.from(t).select("id,dados").eq("importado", false).then(function (r) {
+        if (r.error) return;
+        state[TABELAS[t]] = (r.data || []).map(function (x) { return Object.assign({ id: x.id }, x.dados); });
+        if (t === "pagamentos") state.pags.sort(function (a, b) { return String(b.registrado_em).localeCompare(String(a.registrado_em)); });
+        render();
+      });
+    });
+  }
+  function entrou(sessao) {
+    el("tela-entrar").hidden = !!sessao;
+    state.podeEscrever = !!sessao;
+    if (sessao) { el("ola").textContent = "Bem-vinda, Viviane! Aqui está o resumo do seu clube."; carregar(); }
+  }
+  SB.auth.getSession().then(function (r) { entrou(r.data.session); });
+  SB.auth.onAuthStateChange(function (_ev, sessao) { entrou(sessao); });
+  setInterval(function () { if (state.podeEscrever && !document.hidden) carregar(); }, 60000);
+  el("form-entrar").addEventListener("submit", function (ev) {
+    ev.preventDefault();
+    el("e-botao").disabled = true; el("e-msg").textContent = "Entrando…";
+    SB.auth.signInWithPassword({ email: el("e-email").value.trim(), password: el("e-senha").value }).then(function (r) {
+      el("e-botao").disabled = false;
+      el("e-msg").textContent = r.error ? "E-mail ou senha não conferem." : "";
+    });
+  });
+})();
+</script>
+
+</body></html>
