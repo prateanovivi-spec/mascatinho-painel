@@ -633,7 +633,12 @@ tr.fin-nao td { opacity:.5 }
   }
 
   function graficoReceita(box, alto) {
+    // 05/11 (pedido dela): receita de cada mês do registro de pagamentos (novembro em diante) — não só da planilha
     var r = (state.base && state.base.receita) || [];
+    if (state.fin && state.fin.clube && state.fin.clube.length) {
+      var MS = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
+      r = state.fin.clube.slice(-6).map(function (c) { var p = c.mes.split("-"); return { mes: MS[+p[1] - 1], ano: +p[0], valor: c.valor }; });
+    }
     if (!r.length) { box.innerHTML = '<p class="vazio">Sem dados.</p>'; return; }
     var W = 320, H = alto, padL = 44, padB = 26, padT = 12, w = W - padL - 8, h = H - padB - padT;
     var max = Math.max.apply(null, r.map(function (x) { return x.valor || 0; }));
@@ -659,6 +664,19 @@ tr.fin-nao td { opacity:.5 }
     box.innerHTML = s + "</svg>";
   }
 
+  function receitaDoMes(ult) {
+    // 05/11: o quadro mostra o MÊS DE HOJE, somando cada pagamento confirmado (atualiza de 15 em 15 min)
+    var m = (function () { var d = new Date(); return d.getFullYear() + "-" + ("0" + (d.getMonth() + 1)).slice(-2); })();
+    var c = state.fin && state.fin.clube ? state.fin.clube.filter(function (x) { return x.mes === m; })[0] : null;
+    var nomes = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+    el("k-receita-rot").textContent = "Receita de " + nomes[+m.slice(5) - 1];
+    if (c) { el("k-receita").textContent = (c.valor || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+             el("k-receita-sub").textContent = "até agora · " + c.n + (c.n === 1 ? " pagamento" : " pagamentos"); }
+    else if (state.fin && state.fin.clube) { el("k-receita").textContent = "R$ 0,00"; el("k-receita-sub").textContent = "nenhum pagamento ainda"; }
+    else if (state.fin && state.fin.clubeLido && ult) { el("k-receita-rot").textContent = "Receita de " + ult.mes; el("k-receita").textContent = ult.valor ? reais(ult.valor) : "—"; }
+    else { el("k-receita").textContent = "…"; el("k-receita-sub").textContent = ""; }
+  }
+
   function render() {
     var b = state.base, lista = clientes();
     el("fresco").textContent = b ? "Dados de " + b.gerado_em : "Sem dados ainda";
@@ -666,10 +684,9 @@ tr.fin-nao td { opacity:.5 }
     var ativos = lista.filter(function (c) { return c.s !== "saiu do grupo"; });
     var n = function (f) { return filtrar(lista, f).length; };
     el("k-ativos").textContent = ativos.length;
-    el("k-ativos-sub").textContent = "lista de " + b.mes;
+    el("k-ativos-sub").textContent = "hoje";
     var ult = b.receita[b.receita.length - 1];
-    el("k-receita-rot").textContent = "Receita de " + b.mes.split("/")[0];
-    el("k-receita").textContent = ult && ult.valor ? reais(ult.valor) : "—";
+    receitaDoMes(ult);
     // próximos vencimentos agrupados pelo dia (hoje: dia 10 e dia 20; a partir de dezembro, cada cliente no seu dia)
     var porDia = {}, h0 = hoje();
     ativos.forEach(function (c) { if (c.vence && c.vence >= h0) { var k = isoDia(c.vence); porDia[k] = (porDia[k] || 0) + 1; } });
@@ -1131,6 +1148,7 @@ tr.fin-nao td { opacity:.5 }
   function desenharFinancas() {
     var sec = document.querySelector('[data-view="financas"]');
     if (!sec) return;
+    if (state.base) { receitaDoMes(state.base.receita[state.base.receita.length - 1]); graficoReceita(el("grafico-mini"), 190); graficoReceita(el("grafico-grande"), 240); }
     var F = state.fin, meses = finMeses();
     if (!F.mes || meses.indexOf(F.mes) < 0) F.mes = mesAtual();
     var sel = el("fin-mes"), opts = meses.map(function (m) { return '<option value="' + m + '"' + (m === F.mes ? " selected" : "") + ">" + nomeMes(m) + "</option>"; }).join("");
@@ -1395,7 +1413,7 @@ tr.fin-nao td { opacity:.5 }
       });
     }
     var a = pagina(0);
-    var b = SB.from("hub").select("dados").eq("id", "financas").maybeSingle().then(function (r) { if (!r.error && r.data) state.fin.clube = r.data.dados.clube || []; });
+    var b = SB.from("hub").select("dados").eq("id", "financas").maybeSingle().then(function (r) { state.fin.clubeLido = true; if (!r.error && r.data) state.fin.clube = r.data.dados.clube || []; });
     function talvezDesenhar() {                 // a cada minuto o painel recarrega: só redesenha se algo mudou (não apaga o que ela está digitando)
       var sig = state.fin.ok + "|" + JSON.stringify(state.fin.linhas) + "|" + JSON.stringify(state.fin.clube);
       if (sig !== state.fin.sig) { state.fin.sig = sig; desenharFinancas(); }
