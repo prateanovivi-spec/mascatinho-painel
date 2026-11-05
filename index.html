@@ -265,7 +265,7 @@ tr.fin-nao td { opacity:.5 }
     <div class="cartao">
       <h2><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5"/></svg>Clientes do mês <span class="sub" id="mes-txt"></span>
         <a class="btn btn-brand dir" href="#novo"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Novo cliente</a></h2>
-      <p class="explica">Só os seus clientes (Elo7) da lista do mês vigente. Os do esposo (RF/RFB) não entram. O pagamento confirmado vale antes da planilha.</p>
+      <p class="explica">Seus clientes do mês, com o pagamento confirmado no WhatsApp ou registrado aqui.</p>
       <div class="tabs" role="tablist" id="tabs-clientes"></div>
       <div class="rolar" id="tabela-clientes"></div>
     </div>
@@ -275,7 +275,7 @@ tr.fin-nao td { opacity:.5 }
   <section class="view" data-view="antigos" hidden>
     <div class="cartao">
       <h2><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>Clientes antigas <span class="sub" id="ant-quando"></span></h2>
-      <p class="explica">Todo mundo que já foi sua cliente, desde a primeira (planilha de 2024, 2025 e 2026 + o banco). Só as suas: as do esposo não entram.
+      <p class="explica">Todo mundo que já foi sua cliente, desde a primeira (2024, 2025 e 2026 + o banco).
         Quem volta ao grupo é reconhecida sozinha como <b>retorno</b>. O botão <b>Chamar</b> abre o WhatsApp com a proposta de resgate pronta — você confere e envia.</p>
       <div id="ant-resumo" class="legenda" style="margin:8px 0 12px"></div>
       <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px">
@@ -340,11 +340,9 @@ tr.fin-nao td { opacity:.5 }
           <p class="explica">Chegaram no WhatsApp, mas o leitor não teve certeza. Toque em <b>Conferir</b>: o pagamento já vem preenchido, é só confirmar a cliente e registrar.</p>
           <div id="lista-conferir"></div></div>
         <div class="cartao"><h2><svg viewBox="0 0 24 24"><path d="M12 8v4l3 2"/><circle cx="12" cy="12" r="9"/></svg>Registrados aqui</h2>
-          <p class="explica">Esperando o Claude levar para o computador e para a planilha.</p>
+          <p class="explica">O robô da nuvem leva para a base em até 15 minutos.</p>
           <div id="lista-online"></div></div>
-        <div class="cartao"><h2><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg>Faltam lançar na planilha</h2>
-          <p class="explica">Já contam como pagos. Falta só a linha na planilha.</p>
-          <div id="lista-lancar"></div></div>
+          <div id="lista-lancar" hidden></div>
       </div>
     </div>
   </section>
@@ -378,7 +376,7 @@ tr.fin-nao td { opacity:.5 }
           <li><b>D-3</b>: lembrete 3 dias antes do vencimento.</li>
           <li><b>D0</b>: lembrete no dia do vencimento.</li>
           <li><b>D+1</b>: sai do grupo se não pagou nem avisou atraso.</li>
-          <li>Nunca sai: pacote vigente, fundo bege, quem pagou, comprovante esperando você, quem avisou atraso, cliente do esposo ou nome sem certeza.</li>
+          <li>Nunca sai: pacote vigente, fundo bege, quem pagou, comprovante esperando você, quem avisou atraso ou nome sem certeza.</li>
           <li>Freio: se mais de 15 sairiam no mesmo dia, ninguém sai e você recebe um aviso.</li></ul></div>
         <div class="cartao"><h2>Textos dos lembretes</h2><div id="cob-textos"></div></div>
       </div>
@@ -593,7 +591,7 @@ tr.fin-nao td { opacity:.5 }
 
   function chip(s) { var x = SIT[s] || [s, "s-conf"]; return '<span class="chip ' + x[1] + '">' + esc(x[0]) + "</span>"; }
   function linhaCliente(c, i) {
-    var nota = c.manual ? '<div class="sub"><span class="chip s-lanc">' + esc(c.manual.tipo === "precisa conferir" ? "Tipo a conferir" : "Cliente " + c.manual.tipo) + " · " + (c.manual.origem === "entrada no grupo" ? "cadastro automático" : "cadastro manual") + "</span></div>" : c.lancar ? '<div class="sub"><span class="chip s-lanc">Pago · falta lançar</span></div>' :
+    var nota = c.manual ? '<div class="sub"><span class="chip s-lanc">' + esc(c.manual.tipo === "precisa conferir" ? "Tipo a conferir" : "Cliente " + c.manual.tipo) + " · " + (c.manual.origem === "entrada no grupo" ? "cadastro automático" : "cadastro manual") + "</span></div>" : 
       (c.conferir && c.conferir.length ? '<div class="sub">⚠ ' + esc(c.conferir[0]) + "</div>" : "");
     var grupo = c.grupo ? '<span title="' + esc(c.grupo.nome) + '">✓ ' + esc(c.grupo.nome || "(sem nome)") + "</span>" :
       (c.parecido ? '<span class="sub">nome parecido</span>' : '<span class="sub">não achei</span>');
@@ -676,7 +674,7 @@ tr.fin-nao td { opacity:.5 }
     el("k-atraso").textContent = n("atraso");
     el("mes-txt").textContent = "· " + b.mes;
 
-    var optsP = [["atencao", "Precisam de atenção", n("atencao")], ["vencendo", "Vencendo", n("vencendo")], ["atraso", "Em atraso", n("atraso")], ["lancar", "Falta lançar", n("lancar")]];
+    var optsP = [["atencao", "Precisam de atenção", n("atencao")], ["vencendo", "Vencendo", n("vencendo")], ["atraso", "Em atraso", n("atraso")]];
     tabs("tabs-painel", optsP, state.filtroPainel, function (f) { state.filtroPainel = f; render(); });
     // 05/11: com algo na busca, procura em TODOS os clientes (não só na aba aberta) — antes a Camila "sumia"
     var buscando = !!normal(state.busca);
@@ -684,7 +682,7 @@ tr.fin-nao td { opacity:.5 }
     el("tabela-painel").innerHTML = (buscando ? '<p class="sub">Buscando em todos os clientes</p>' : "") + tabela(lp.slice(0, buscando ? 30 : 8), buscando ? "Nenhum cliente com esse nome." : "Ninguém aqui agora.") + (lp.length > (buscando ? 30 : 8) ? '<p class="sub">e mais ' + (lp.length - (buscando ? 30 : 8)) + "…</p>" : "");
 
     var optsC = [["todos", "Ativos", n("todos")], ["emdia", "Em dia", n("emdia")], ["vencendo", "Vencendo", n("vencendo")], ["atraso", "Em atraso", n("atraso")],
-      ["vigente", "Pacote vigente", n("vigente")], ["lancar", "Falta lançar", n("lancar")], ["conferir", "Conferir", n("conferir")], ["aviso", "Avisou atraso", n("aviso")], ["saiu", "Saíram do grupo", n("saiu")]];
+      ["vigente", "Pacote vigente", n("vigente")], ["conferir", "Conferir", n("conferir")], ["aviso", "Avisou atraso", n("aviso")], ["saiu", "Saíram do grupo", n("saiu")]];
     tabs("tabs-clientes", optsC, state.filtroClientes, function (f) { state.filtroClientes = f; render(); });
     el("tabela-clientes").innerHTML = (buscando ? '<p class="sub">Buscando em todos os clientes</p>' : "") + tabela(ordenar(buscaFiltra(buscando ? lista : filtrar(lista, state.filtroClientes))), buscando ? "Nenhum cliente com esse nome." : "Nenhum cliente com esse filtro.");
 
@@ -694,7 +692,6 @@ tr.fin-nao td { opacity:.5 }
       ["#E5484D", b.devem_sair.length + " devem sair do grupo", "#grupo", ""],
       ["#25A55F", (b.a_conferir || []).length + " comprovantes do WhatsApp para conferir", "#pagamentos", ""],
       ["#3B82F6", (b.entradas || []).filter(function (e) { return (e.resultado || "").indexOf("cadastrada") === 0; }).length + " entraram no grupo e foram cadastradas", "#grupo", ""],
-      ["#7B4FD6", n("lancar") + " pagos faltam lançar na planilha", "#pagamentos", ""],
       ["#9A93A8", (b.conferir_grupo.length + n("conferir")) + " casos para conferir", "#clientes", "conferir"]
     ];
     el("proximas").innerHTML = prox.map(function (p) { return '<li><a href="' + p[2] + '"' + (p[3] ? ' data-filtro="' + p[3] + '"' : "") + '><span class="ponto" style="background:' + p[0] + '"></span><span><b>' + esc(p[1].split(" ")[0]) + "</b> " + esc(p[1].split(" ").slice(1).join(" ")) + '</span><span class="seta">›</span></a></li>'; }).join("");
@@ -732,7 +729,7 @@ tr.fin-nao td { opacity:.5 }
     }).join("");
 
     // grupo
-    var QUEM = [["minha", "Suas (Elo7)", "var(--brand)"], ["minha (pela planilha)", "Suas (nome na planilha)", "var(--lav-ink)"], ["esposo", "Do esposo (fora)", "#6C8EBF"],
+    var QUEM = [["minha", "Suas (Elo7)", "var(--brand)"], ["minha (pela planilha)", "Suas (nome na planilha)", "var(--lav-ink)"],
       ["sem marca", "Sem marca", "#B9B3C4"], ["conferir", "Conferir", "#E0B341"], ["equipe", "Equipe", "#8E8798"]];
     el("grupo-info").textContent = (b.grupo_nome || "Grupo") + " · " + b.contas_no_grupo + " contas · lido em " + b.grupo_lido_em;
     el("barra-quem").innerHTML = QUEM.filter(function (q) { return g[q[0]]; }).map(function (q) { return '<span style="flex:' + g[q[0]] + ";background:" + q[2] + '" title="' + q[1] + ": " + g[q[0]] + '"></span>'; }).join("");
@@ -751,11 +748,8 @@ tr.fin-nao td { opacity:.5 }
     state.candidatas = candidatas;
     var htmlExc = '<div class="cartao"><h2>Possíveis exclusões do grupo <span class="chip s-atraso">' + candidatas.length + "</span>" +
       (state.podeEscrever && candidatas.some(function (x) { return !pedidas[String(x["ID do Telegram"])]; }) ? '<button class="btn btn-brand dir" type="button" data-remover-todas="1">Remover todas</button>' : "") + "</h2>" +
-      '<p class="explica">Estão em vermelho numa das planilhas, ou não aparecem em nenhuma das duas planilhas vigentes (a sua e a do esposo). Ao tocar em <b>Remover</b>, o robô da nuvem confere de novo (pagamento, comprovante, aviso de atraso, cadastro) e tira do grupo em até 15 minutos. Quem sair pode voltar pelo link se pagar.' +
+      '<p class="explica">Não estão pagas na sua lista de clientes. Ao tocar em <b>Remover</b>, o robô da nuvem confere de novo (pagamento, comprovante, aviso de atraso, cadastro) e tira do grupo em até 15 minutos. Quem sair pode voltar pelo link se pagar.' +
       (cz.lido_em ? " Grupo lido em " + esc(cz.lido_em) + "." : "") + "</p>" +
-      (cz.esposo_saiu ? '<p class="explica"><b>' + cz.esposo_saiu + ' pessoa(s) marcada(s) em vermelho (saiu) na planilha do esposo</b> ainda estão no grupo. Os nomes não aparecem aqui, porque são da carteira dele. ' +
-        (state.remocoes.some(function (x) { return x.acao === "esposo_saiu" && !x.resultado; }) ? '<span class="chip s-venc">pedido enviado</span>' :
-          (state.podeEscrever ? '<button class="btn btn-ghost" type="button" data-esposo-saiu="1">Tirar do grupo</button>' : "")) + "</p>" : "") +
       (candidatas.length ? '<div class="rolar"><table><thead><tr><th>Conta no grupo</th><th>Por quê</th><th></th></tr></thead><tbody>' + candidatas.map(function (x, i) {
         var id = String(x["ID do Telegram"]), ped = pedidas[id];
         var acao = ped ? '<span class="chip ' + (ped.resultado === "removida" ? "s-ok" : ped.resultado ? "s-conf" : "s-venc") + '">' + esc(ped.resultado || (ped.acao === "manter" ? "manter pedido" : "remoção pedida")) + "</span>" :
