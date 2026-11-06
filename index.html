@@ -433,11 +433,20 @@ tr.fin-nao td { opacity:.5 }
             <div class="form-fim"><button class="btn btn-brand" type="submit" id="cb-enviar">Combinar</button><span class="msg" id="cb-msg" role="status"></span></div>
           </form>
           <div id="cob-comb"></div></div>
+        <div class="cartao"><h2>Não vai renovar</h2>
+          <p class="explica">Para quem avisou que não vai continuar: o robô <b>para de cobrar</b>, ela fica no grupo <b>até o vencimento</b> e sai no dia seguinte, <b>sem mensagem</b>. Se ela pagar depois, volta normalmente.<br>🩷 <b>Atalho:</b> mande para a cliente a sua figurinha "vou sentir sua falta" que o robô já marca sozinho (ensine a figurinha uma vez mandando-a para você mesma, na conversa "Você").</p>
+          <div id="nr-sugestoes"></div>
+          <form class="pag" id="form-nr">
+            <label class="cheio">Cliente<input id="nr-nome" list="lista-nomes" required placeholder="nome da cliente"></label>
+            <div class="form-fim"><button class="btn btn-brand" type="submit" id="nr-enviar">Marcar: não vai renovar</button><span class="msg" id="nr-msg" role="status"></span></div>
+          </form>
+          <div id="nr-lista"></div></div>
         <div class="cartao"><h2>Como funciona</h2><ul class="regras">
           <li><b>5 dias antes</b>, <b>2 dias antes</b> e <b>no dia</b>: lembrete com o link de pagamento só da cliente (Mercado Pago).</li>
           <li><b>1 dia depois</b>: sai do grupo se não pagou, não avisou atraso e não combinou outra data.</li>
           <li><b>2 dias depois</b>: mensagem de saudades para quem saiu.</li>
           <li>Nunca sai: pacote vigente, quem pagou, comprovante esperando você, quem avisou atraso, data combinada ou nome sem certeza.</li>
+          <li><b>Não vai renovar</b>: sem cobrança; sai no dia seguinte ao vencimento, sem mensagem. Você marca aqui, confirma o que o robô viu no WhatsApp ou manda a figurinha "vou sentir sua falta".</li>
           <li>Freio: se mais de 20 sairiam no mesmo dia, ninguém sai e você recebe um aviso.</li></ul></div>
         <div class="cartao"><h2>Textos dos lembretes</h2><div id="cob-textos"></div></div>
       </div>
@@ -933,6 +942,23 @@ tr.fin-nao td { opacity:.5 }
       return "<tr><td><div class='nome'>" + esc(c.nome) + "</div><div class='sub'>vence " + fmt(c.vence) + "</div></td><td><span class='chip s-venc'>até " + esc(fmt(parse(ate))) + "</span></td><td style='text-align:right'>" +
         (state.podeEscrever ? "<button class='btn btn-ghost' type='button' data-comb-desfazer='" + esc(c.k) + "' data-nome='" + esc(c.nome) + "'>Desfazer</button>" : "") + "</td></tr>";
     }).join("") + "</tbody></table></div>" : '<p class="vazio">Nenhuma data combinada agora.</p>';
+    // 06/11: "não vai renovar" (sugestões do WhatsApp + confirmadas)
+    var nrFeito = {}, sugFeita = {};
+    (state.avisosM || []).forEach(function (a) {
+      if (a.acao === "nao_renova") nrFeito[a.k] = true; if (a.acao === "nao_renova_desfazer") nrFeito[a.k] = false;
+      if (a.sugestao_id) sugFeita[a.sugestao_id] = a.acao === "nao_renova_ignorar" ? "ignorada" : "confirmada"; });
+    var sug = (b.sugestoes_nao_renova || []).filter(function (s) { return !sugFeita[s.id]; });
+    el("nr-sugestoes").innerHTML = sug.length ? '<p class="sub"><b>O robô viu no WhatsApp</b> (confirme ou ignore):</p><div class="rolar"><table><tbody>' + sug.map(function (s) {
+      return "<tr><td><div class='nome'>" + esc(s.nome) + "</div><div class='sub'>“" + esc(s.texto) + "” · " + esc(fmt(parse(s.data))) + "</div></td><td style='text-align:right'>" +
+        (!state.podeEscrever ? "" : "<span class='dono-acoes'>" + (s.k ? "" : "<input class='dono-nome' list='lista-nomes' id='nrs-" + esc(s.id) + "' placeholder='qual cliente?'>") +
+          "<button class='btn btn-brand' type='button' data-nr-sim='" + esc(s.id) + "' data-k='" + esc(s.k || "") + "' data-nome='" + esc(s.nome) + "' data-texto='" + esc(s.texto) + "'>Confirmar</button> " +
+          "<button class='btn btn-ghost' type='button' data-nr-nao='" + esc(s.id) + "'>Ignorar</button></span>") + "</td></tr>";
+    }).join("") + "</tbody></table></div>" : "";
+    var nrs = ativos.filter(function (c) { return nrFeito[c.k] !== undefined ? nrFeito[c.k] : c.nao_renova; });
+    el("nr-lista").innerHTML = nrs.length ? '<div class="rolar"><table><tbody>' + nrs.map(function (c) {
+      return "<tr><td><div class='nome'>" + esc(c.nome) + "</div><div class='sub'>fica até " + fmt(c.vence) + "</div></td><td><span class='chip s-saiu'>não renova</span></td><td style='text-align:right'>" +
+        (state.podeEscrever ? "<button class='btn btn-ghost' type='button' data-nr-desfazer='" + esc(c.k) + "' data-nome='" + esc(c.nome) + "'>Desfazer</button>" : "") + "</td></tr>";
+    }).join("") + "</tbody></table></div>" : '<p class="vazio">Ninguém marcado.</p>';
     el("cob-textos").innerHTML = (camp.etapas || []).map(function (e) {
       return "<p><b>" + esc(e.etapa) + "</b> " + (e.aprovado ? '<span class="chip s-ok">aprovado</span>' : '<span class="chip s-conf">ainda não aprovado</span>') +
         (e.imagem ? ' <span class="sub">🖼 ' + esc(e.imagem) + "</span>" : ' <span class="sub">sem imagem</span>') + "<br>" +
@@ -1009,6 +1035,23 @@ tr.fin-nao td { opacity:.5 }
       state.db.collection("avisos_manuais").add({ acao: "combinado_desfazer", k: cd.getAttribute("data-comb-desfazer"), nome: cd.getAttribute("data-nome"), registrado_em: new Date().toISOString() })
         .catch(function () { cd.disabled = false; });
     }
+    var nrSim = ev.target.closest("[data-nr-sim]"), nrNao = ev.target.closest("[data-nr-nao]"), nrDes = ev.target.closest("[data-nr-desfazer]");
+    if ((nrSim || nrNao || nrDes) && state.db) {
+      var doc;
+      if (nrSim) {
+        var sid = nrSim.getAttribute("data-nr-sim"), kk2 = nrSim.getAttribute("data-k"), nome2 = nrSim.getAttribute("data-nome");
+        if (!kk2) {
+          var campo2 = el("nrs-" + sid), escolhido = campo2 ? campo2.value.trim() : "";
+          var achada2 = state.base && state.base.clientes.find(function (c) { return c.nome.toLowerCase() === escolhido.toLowerCase(); });
+          if (!achada2) { if (campo2) { campo2.focus(); campo2.placeholder = "escolha o nome da lista"; } return; }
+          kk2 = achada2.k; nome2 = achada2.nome;
+        }
+        doc = { acao: "nao_renova", k: kk2, nome: nome2, sugestao_id: sid, texto: nrSim.getAttribute("data-texto") };
+      } else if (nrNao) doc = { acao: "nao_renova_ignorar", sugestao_id: nrNao.getAttribute("data-nr-nao") };
+      else doc = { acao: "nao_renova_desfazer", k: nrDes.getAttribute("data-nr-desfazer"), nome: nrDes.getAttribute("data-nome") };
+      var bt = nrSim || nrNao || nrDes; bt.disabled = true; doc.registrado_em = new Date().toISOString();
+      state.db.collection("avisos_manuais").add(doc).catch(function () { bt.disabled = false; });
+    }
     var dn2 = ev.target.closest("[data-dono]");
     if (dn2 && state.db) {
       var idc = dn2.getAttribute("data-id"), qual = dn2.getAttribute("data-dono"), campo = el("dn-" + idc), cli = campo ? campo.value.trim() : "";
@@ -1034,6 +1077,17 @@ tr.fin-nao td { opacity:.5 }
     if (d && state.db) { d.disabled = true; state.db.doc("pagamentos/" + d.getAttribute("data-apagar")).delete().catch(function () { d.disabled = false; }); }
   });
   el("busca").addEventListener("input", function () { state.busca = this.value; render(); });
+  el("form-nr").addEventListener("submit", function (ev) {
+    ev.preventDefault();
+    var nome = el("nr-nome").value.trim();
+    var achada = state.base && state.base.clientes.find(function (c) { return c.nome.toLowerCase() === nome.toLowerCase(); });
+    if (!achada) { el("nr-msg").textContent = "Escolha o nome da lista (comece a digitar e toque no nome)."; el("nr-msg").className = "msg erro"; return; }
+    el("nr-enviar").disabled = true;
+    state.db.collection("avisos_manuais").add({ acao: "nao_renova", k: achada.k, nome: achada.nome, registrado_em: new Date().toISOString() })
+      .then(function () { el("nr-msg").textContent = "✔ Marcado. O robô para de cobrar; ela fica até o vencimento."; el("nr-msg").className = "msg ok"; el("nr-nome").value = ""; })
+      .catch(function () { el("nr-msg").textContent = "Não salvou. Tente de novo."; el("nr-msg").className = "msg erro"; })
+      .then(function () { el("nr-enviar").disabled = false; });
+  });
   el("form-comb").addEventListener("submit", function (ev) {
     ev.preventDefault();
     var nome = el("cb-nome").value.trim(), ate = el("cb-data").value;
