@@ -422,12 +422,23 @@ tr.fin-nao td { opacity:.5 }
     <div class="grade">
       <div class="col" id="cob-listas"></div>
       <div class="col">
+        <div class="cartao"><h2>Clientes sem telefone</h2>
+          <p class="explica">Sem telefone o robô não consegue mandar a cobrança. Digite o WhatsApp com DDD (ex.: 11 91234-5678) e toque em <b>Salvar</b>. Em até 15 minutos o robô já usa.</p>
+          <div id="cob-semtel"></div></div>
+        <div class="cartao"><h2>Combinou pagar em outra data</h2>
+          <p class="explica">Até a data combinada o robô <b>não cobra</b> e <b>não tira do grupo</b>. Se passar do dia e ela não pagar, sai no dia seguinte, como sempre.</p>
+          <form class="pag" id="form-comb">
+            <label class="cheio">Cliente<input id="cb-nome" list="lista-nomes" required placeholder="nome da cliente"></label>
+            <label>Vai pagar até<input id="cb-data" type="date" required></label>
+            <div class="form-fim"><button class="btn btn-brand" type="submit" id="cb-enviar">Combinar</button><span class="msg" id="cb-msg" role="status"></span></div>
+          </form>
+          <div id="cob-comb"></div></div>
         <div class="cartao"><h2>Como funciona</h2><ul class="regras">
-          <li><b>D-3</b>: lembrete 3 dias antes do vencimento.</li>
-          <li><b>D0</b>: lembrete no dia do vencimento.</li>
-          <li><b>D+1</b>: sai do grupo se não pagou nem avisou atraso.</li>
-          <li>Nunca sai: pacote vigente, fundo bege, quem pagou, comprovante esperando você, quem avisou atraso ou nome sem certeza.</li>
-          <li>Freio: se mais de 15 sairiam no mesmo dia, ninguém sai e você recebe um aviso.</li></ul></div>
+          <li><b>5 dias antes</b>, <b>2 dias antes</b> e <b>no dia</b>: lembrete com o link de pagamento só da cliente (Mercado Pago).</li>
+          <li><b>1 dia depois</b>: sai do grupo se não pagou, não avisou atraso e não combinou outra data.</li>
+          <li><b>2 dias depois</b>: mensagem de saudades para quem saiu.</li>
+          <li>Nunca sai: pacote vigente, quem pagou, comprovante esperando você, quem avisou atraso, data combinada ou nome sem certeza.</li>
+          <li>Freio: se mais de 20 sairiam no mesmo dia, ninguém sai e você recebe um aviso.</li></ul></div>
         <div class="cartao"><h2>Textos dos lembretes</h2><div id="cob-textos"></div></div>
       </div>
     </div>
@@ -904,6 +915,24 @@ tr.fin-nao td { opacity:.5 }
           b.saidas.slice().reverse().map(function (s) { return "<tr><td>" + esc(s.data) + "</td><td>" + esc(s.cliente) + "<div class='sub'>" + esc(s.conta_grupo || "") + "</div></td><td>" + esc(s.motivo) + "</td><td>" + esc(s.resultado) + "</td></tr>"; }).join("") +
           "</tbody></table></div>" : '<p class="vazio">Ninguém saiu do grupo pelo robô ainda.</p>') + "</div>";
     var camp = b.campanha_cobranca || {}, fx = b.fichas || {};
+    // 06/11: telefone direto na lista e "combinou pagar em outra data"
+    var feitosTel = {}, feitosComb = {};
+    (state.avisosM || []).forEach(function (a) { if (a.acao === "telefone") feitosTel[a.k] = a.telefone; if (a.acao === "combinado") feitosComb[a.k] = a.ate; if (a.acao === "combinado_desfazer") feitosComb[a.k] = ""; });
+    var semTel = ativos.filter(function (c) { return !c.tem_tel && c.s !== "saiu do grupo"; })
+      .sort(function (a, b2) { return (a.vence || 0) - (b2.vence || 0); });
+    el("cob-semtel").innerHTML = semTel.length ? '<div class="rolar"><table><tbody>' + semTel.map(function (c) {
+      var ok = feitosTel[c.k];
+      return "<tr><td><div class='nome'>" + esc(c.nome) + "</div><div class='sub'>vence " + fmt(c.vence) + "</div></td><td style='text-align:right'>" +
+        (ok ? "<span class='chip s-ok'>salvo: " + esc(ok) + "</span>" : !state.podeEscrever ? "" :
+          "<span class='dono-acoes'><input class='dono-nome' inputmode='tel' id='tel-" + esc(c.k) + "' placeholder='DDD + número' aria-label='Telefone de " + esc(c.nome) + "'>" +
+          "<button class='btn btn-brand' type='button' data-tel='" + esc(c.k) + "' data-nome='" + esc(c.nome) + "'>Salvar</button></span>") + "</td></tr>";
+    }).join("") + "</tbody></table></div>" : '<p class="vazio">Todas as clientes ativas têm telefone. 🎉</p>';
+    var comb = ativos.filter(function (c) { return (feitosComb[c.k] !== undefined ? feitosComb[c.k] : c.combinado); });
+    el("cob-comb").innerHTML = comb.length ? '<div class="rolar"><table><tbody>' + comb.map(function (c) {
+      var ate = feitosComb[c.k] !== undefined ? feitosComb[c.k] : c.combinado;
+      return "<tr><td><div class='nome'>" + esc(c.nome) + "</div><div class='sub'>vence " + fmt(c.vence) + "</div></td><td><span class='chip s-venc'>até " + esc(fmt(parse(ate))) + "</span></td><td style='text-align:right'>" +
+        (state.podeEscrever ? "<button class='btn btn-ghost' type='button' data-comb-desfazer='" + esc(c.k) + "' data-nome='" + esc(c.nome) + "'>Desfazer</button>" : "") + "</td></tr>";
+    }).join("") + "</tbody></table></div>" : '<p class="vazio">Nenhuma data combinada agora.</p>';
     el("cob-textos").innerHTML = (camp.etapas || []).map(function (e) {
       return "<p><b>" + esc(e.etapa) + "</b> " + (e.aprovado ? '<span class="chip s-ok">aprovado</span>' : '<span class="chip s-conf">ainda não aprovado</span>') +
         (e.imagem ? ' <span class="sub">🖼 ' + esc(e.imagem) + "</span>" : ' <span class="sub">sem imagem</span>') + "<br>" +
@@ -966,6 +995,20 @@ tr.fin-nao td { opacity:.5 }
       state.conferindo = x.id; el("f-msg").className = "msg"; el("f-msg").textContent = "Confira a cliente e toque em Registrar.";
       el("cartao-form").scrollIntoView({ block: "start" }); el("f-nome").focus();
     }
+    var tb = ev.target.closest("[data-tel]");
+    if (tb && state.db) {
+      var kk = tb.getAttribute("data-tel"), campoT = el("tel-" + kk), dig = (campoT ? campoT.value : "").replace(/\D/g, "");
+      if (dig.length < 10 || dig.length > 13) { if (campoT) { campoT.focus(); campoT.placeholder = "DDD + número (10 ou 11 dígitos)"; campoT.value = ""; } return; }
+      tb.disabled = true;
+      state.db.collection("avisos_manuais").add({ acao: "telefone", k: kk, nome: tb.getAttribute("data-nome"), telefone: dig, registrado_em: new Date().toISOString() })
+        .catch(function () { tb.disabled = false; });
+    }
+    var cd = ev.target.closest("[data-comb-desfazer]");
+    if (cd && state.db) {
+      cd.disabled = true;
+      state.db.collection("avisos_manuais").add({ acao: "combinado_desfazer", k: cd.getAttribute("data-comb-desfazer"), nome: cd.getAttribute("data-nome"), registrado_em: new Date().toISOString() })
+        .catch(function () { cd.disabled = false; });
+    }
     var dn2 = ev.target.closest("[data-dono]");
     if (dn2 && state.db) {
       var idc = dn2.getAttribute("data-id"), qual = dn2.getAttribute("data-dono"), campo = el("dn-" + idc), cli = campo ? campo.value.trim() : "";
@@ -991,6 +1034,18 @@ tr.fin-nao td { opacity:.5 }
     if (d && state.db) { d.disabled = true; state.db.doc("pagamentos/" + d.getAttribute("data-apagar")).delete().catch(function () { d.disabled = false; }); }
   });
   el("busca").addEventListener("input", function () { state.busca = this.value; render(); });
+  el("form-comb").addEventListener("submit", function (ev) {
+    ev.preventDefault();
+    var nome = el("cb-nome").value.trim(), ate = el("cb-data").value;
+    var achada = state.base && state.base.clientes.find(function (c) { return c.nome.toLowerCase() === nome.toLowerCase(); });
+    if (!achada) { el("cb-msg").textContent = "Escolha o nome da lista (comece a digitar e toque no nome)."; el("cb-msg").className = "msg erro"; return; }
+    if (!ate) return;
+    el("cb-enviar").disabled = true;
+    state.db.collection("avisos_manuais").add({ acao: "combinado", k: achada.k, nome: achada.nome, ate: ate, registrado_em: new Date().toISOString() })
+      .then(function () { el("cb-msg").textContent = "✔ Combinado. Até essa data o robô não cobra nem tira do grupo."; el("cb-msg").className = "msg ok"; el("cb-nome").value = ""; })
+      .catch(function () { el("cb-msg").textContent = "Não salvou. Tente de novo."; el("cb-msg").className = "msg erro"; })
+      .then(function () { el("cb-enviar").disabled = false; });
+  });
 
   // formulário
   el("f-data").value = new Date(Date.now() - new Date().getTimezoneOffset() * 6e4).toISOString().slice(0, 10);
