@@ -199,8 +199,10 @@ nav a.ativo { background:rgba(255,255,255,.94); color:var(--brand-text); box-sha
   --butter:#FAF0DC; --butter-ink:#8A6A2A; --blush:#FAE6E4; --blush-ink:#A8434F }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --mint:#22302A; --mint-ink:#A9CDB2; --lav:#3A262C; --lav-ink:#F0BFCB;
   --butter:#3A3020; --butter-ink:#E8CB8A; --blush:#3E2226; --blush-ink:#F3A9B1 } }
+/* ===== fim do visual dela ===== */
 
 /* finanças */
+.dono-acoes { display:flex; gap:6px; flex-wrap:wrap; align-items:center } .dono-nome { padding:7px 9px; border-radius:9px; border:1px solid var(--line); background:var(--bg); min-width:150px }
 .fin-topo { display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:16px }
 .fin-mes { display:flex; align-items:center; gap:8px; font:700 14px var(--display); color:var(--muted); margin-right:auto }
 .fin-mes select, .fin-sel { padding:9px 12px; border-radius:10px; border:1px solid var(--line); background:var(--surface); font-weight:700 }
@@ -530,7 +532,18 @@ tr.fin-nao td { opacity:.5 }
 <script>
 (function () {
   "use strict";
-  var MESES_PLANO = { mensal: 1, trimestral: 3, semestral: 6, anual: 12 };
+  // multiloja (04/11): a loja deste painel. O Mascatinho usa estes valores; outra loja recebe window.LOJA_CONFIG
+  // (gerado por gerar_painel.py a partir do loja.json dela). Nada de loja fica escrito no resto do código.
+  var LOJA = window.LOJA_CONFIG || {
+    id: "mascatinho", nome: "Mascatinho", marca: "Elo7",
+    supabase_url: "https://ubxyayfgyadqsoivfkke.supabase.co", supabase_chave: "sb_publishable_YIFCWKukeP5QhSp4iCEUpw_GP4WplyT",
+    planos: { mensal: { meses: 1, valor: 30, nome: "Mensal" }, trimestral: { meses: 3, valor: 75, nome: "Trimestral" },
+      semestral: { meses: 6, valor: 129, nome: "Semestral" }, anual: { meses: 12, valor: 219, nome: "Anual" } },
+    plano_padrao: "mensal", plano_primeiro_mes: "mensal", primeiro_mes_nova: 10, regra_10_20_ate: "2026-11-30"
+  };
+  var MESES_PLANO = {};
+  Object.keys(LOJA.planos).forEach(function (p) { MESES_PLANO[p] = LOJA.planos[p].meses; });
+  function nomePlano(p) { return (LOJA.planos[p] && LOJA.planos[p].nome) || (p ? p.charAt(0).toUpperCase() + p.slice(1) : ""); }
   var SIT = {
     "em dia": ["Em dia", "s-ok"], "vencendo": ["Vencendo", "s-venc"], "vencido": ["Vencido", "s-vencido"],
     "atrasado": ["Atrasado", "s-atraso"], "saiu do grupo": ["Saiu do grupo", "s-saiu"], "precisa conferir": ["Conferir", "s-conf"]
@@ -538,7 +551,7 @@ tr.fin-nao td { opacity:.5 }
   var AV = ["k-mint", "k-lav", "k-butter", "k-blush"];
   var TITULOS = { painel: "Painel", clientes: "Clientes", antigos: "Clientes antigas", pagamentos: "Pagamentos", planos: "Planos", cobranca: "Cobrança", novo: "Novo cliente", grupo: "Grupo do Telegram", relatorios: "Relatórios", financas: "Finanças" };
   var state = { base: null, pags: [], novos: [], avisosM: [], remocoes: [], podeEscrever: false, filtroClientes: "todos", filtroPainel: "atencao", busca: "", db: null, nome: "",
-    fin: { ok: null, linhas: [], clube: null, mes: "", filtro: "tudo", previa: null } };
+    fin: { ok: null, linhas: [], clube: null, mes: "", filtro: "tudo", previa: null }, donos: {} };
 
   function el(id) { return document.getElementById(id); }
   function esc(t) { return String(t == null ? "" : t).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
@@ -552,7 +565,7 @@ tr.fin-nao td { opacity:.5 }
   function parse(iso) { if (!iso) return null; var p = iso.split("-"); return new Date(+p[0], +p[1] - 1, +(p[2] || 1)); }
   // até 30/11/2026: pagou até o dia 15 vence no dia 10, do dia 16 em diante vence no dia 20; depois, mesmo dia do pagamento
   function somarMeses(d, n) { var y = d.getFullYear(), m = d.getMonth() + n;
-    if (d <= new Date(2026, 10, 30)) return new Date(y, m, d.getDate() <= 15 ? 10 : 20);
+    if (LOJA.regra_10_20_ate && d <= parse(LOJA.regra_10_20_ate)) return new Date(y, m, d.getDate() <= 15 ? 10 : 20);
     var ult = new Date(y, m + 1, 0).getDate(); return new Date(y, m, Math.min(d.getDate(), ult)); }
   // 05/11 (regra dela): pagou antes do vencimento (ou no dia) mantém o dia; pagou atrasado conta do dia do pagamento
   function proxVenc(d, n, antes) {
@@ -625,7 +638,7 @@ tr.fin-nao td { opacity:.5 }
         case "emdia": return c.s === "em dia";
         case "vencendo": return c.s === "vencendo";
         case "atraso": return c.s === "vencido" || c.s === "atrasado";
-        case "vigente": return c.pacote_ok && c.plano !== "mensal" && c.s !== "saiu do grupo";
+        case "vigente": return c.pacote_ok && (MESES_PLANO[c.plano] || 1) > 1 && c.s !== "saiu do grupo";
         case "saiu": return c.s === "saiu do grupo";
         case "conferir": return c.s === "precisa conferir" || (c.conferir && c.conferir.length);
         case "lancar": return c.lancar;
@@ -647,9 +660,9 @@ tr.fin-nao td { opacity:.5 }
     var bAviso = state.podeEscrever && c.s !== "saiu do grupo" ? '<button class="icon-btn" type="button" data-aviso="' + esc(c.k) + '" data-nome="' + esc(c.nome) + '" data-tem="' + (c.aviso ? "1" : "") +
       '" title="' + (c.aviso ? "Tirar o aviso de atraso de " : "Marcar que avisou atraso: ") + esc(c.nome) + '" aria-label="' + (c.aviso ? "Tirar aviso de atraso" : "Marcar aviso de atraso") +
       '"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>' + (c.aviso ? '<path d="M5 5l14 14"/>' : "") + "</svg></button>" : "";
-    var acao = bAviso + (state.podeEscrever ? '<button class="icon-btn" type="button" data-pagar="' + esc(c.nome) + '" data-plano="' + esc(c.plano || "mensal") + '" title="Registrar pagamento de ' + esc(c.nome) + '" aria-label="Registrar pagamento de ' + esc(c.nome) + '"><svg viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg></button>' : "");
+    var acao = bAviso + (state.podeEscrever ? '<button class="icon-btn" type="button" data-pagar="' + esc(c.nome) + '" data-plano="' + esc(c.plano || LOJA.plano_padrao) + '" title="Registrar pagamento de ' + esc(c.nome) + '" aria-label="Registrar pagamento de ' + esc(c.nome) + '"><svg viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg></button>' : "");
     return "<tr><td><div class='pessoa'><span class='av " + AV[i % 4] + "'>" + esc(iniciais(c.nome)) + "</span><div><div class='nome'>" + esc(c.nome) + "</div>" + nota + "</div></div></td>" +
-      "<td>" + esc(MESES_PLANO[c.plano] ? cap(c.plano) : "Conferir") + "</td><td>" + reais(c.valor) + "</td>" +
+      "<td>" + esc(MESES_PLANO[c.plano] ? nomePlano(c.plano) : "Conferir") + "</td><td>" + reais(c.valor) + "</td>" +
       "<td>" + fmt(c.vence) + (c.confirmado && c.confirmado.so_mes && !c.online ? "<div class='sub'>dia a confirmar</div>" : "") + "</td>" +
       "<td>" + chip(c.s) + "<div class='sub'>" + esc(c.s === "saiu do grupo" ? "vermelho na planilha" : diasTxt(c)) + "</div></td>" +
       "<td>" + grupo + "</td><td>" + acao + "</td></tr>";
@@ -787,10 +800,10 @@ tr.fin-nao td { opacity:.5 }
     }).join("") + "</tbody></table>" : '<p class="vazio">Nada esperando a planilha.</p>';
 
     // planos
-    el("planos").innerHTML = ["mensal", "trimestral", "semestral", "anual"].map(function (p, i) {
+    el("planos").innerHTML = Object.keys(LOJA.planos).map(function (p, i) {
       var cs = ativos.filter(function (c) { return c.plano === p; }), vig = cs.filter(function (c) { return c.pacote_ok; }).length;
-      var cores = ["var(--mint-ink)", "var(--lav-ink)", "var(--peach-ink)", "var(--blush-ink)"];
-      return '<div class="plano"><h3 style="color:' + cores[i] + '">' + cap(p) + '</h3><div class="num">' + cs.length + "</div><p>" + vig + " com pacote vigente · " + MESES_PLANO[p] + (MESES_PLANO[p] > 1 ? " meses" : " mês") + "</p></div>";
+      var cores = ["var(--mint-ink)", "var(--lav-ink)", "var(--peach-ink)", "var(--blush-ink)", "var(--butter-ink)", "var(--gray-ink)"];
+      return '<div class="plano"><h3 style="color:' + cores[i % cores.length] + '">' + esc(nomePlano(p)) + '</h3><div class="num">' + cs.length + "</div><p>" + vig + " com pacote vigente · " + MESES_PLANO[p] + (MESES_PLANO[p] > 1 ? " meses" : " mês") + "</p></div>";
     }).join("");
 
     // grupo
@@ -805,6 +818,7 @@ tr.fin-nao td { opacity:.5 }
         (linhas.length ? '<div class="rolar"><table><thead><tr>' + cab.map(function (h) { return "<th>" + esc(h) + "</th>"; }).join("") + "</tr></thead><tbody>" +
           linhas.map(function (l) { return "<tr>" + l.map(function (x) { return "<td>" + x + "</td>"; }).join("") + "</tr>"; }).join("") + "</tbody></table></div>" : '<p class="vazio">' + esc(vazio) + "</p>") + "</div>";
     }
+    (state.avisosM || []).forEach(function (a) { if (a.acao === "dono" && a.telegram_id) state.donos[String(a.telegram_id)] = a.dono === "minha" ? "sua: " + (a.cliente || "") : "não é sua"; });
     var saiuNoGrupo = lista.filter(function (c) { return c.s === "saiu do grupo"; });
     var cz = b.conciliacao || {}, pedidas = {};
     state.remocoes.forEach(function (x) { pedidas[String(x.telegram_id)] = x; });
@@ -839,8 +853,15 @@ tr.fin-nao td { opacity:.5 }
         b.saiu_antes.map(function (d) { return [conta(d), esc(d.nome_vermelho), esc(d.mes)]; }), "Ninguém.") +
       bloco("Nomes parecidos", "Pode ser a mesma pessoa, sem certeza.", ["Na planilha", "No grupo", "Parecido"],
         b.parecidos.map(function (p) { return [esc(p.cliente), conta(p.conta), p.nota + "%"]; }), "Nenhum.") +
-      bloco("Contas para conferir", "Sem nome, sem marca, Elo7 e RF juntos, ou Elo7 sem nome na lista do mês. Nada é decidido sozinho.", ["Conta", "Motivo"],
-        b.conferir_grupo.map(function (d) { return [conta(d), esc(d.motivo)]; }), "Nada para conferir.") +
+      // 06/11 (pedido dela): conta do grupo sem dono -> ela diz de quem é, uma vez, e o robô nunca mais pergunta
+      bloco("Contas do grupo sem dono", "Contas sem marca ou com nome que o robô não reconheceu. Toque em <b>É minha</b> e escolha a cliente, ou em <b>Não é minha</b> (some do seu painel). Em até 15 minutos o robô aplica.", ["Conta", "Por quê", ""],
+        b.conferir_grupo.map(function (d) {
+          var feito = state.donos[String(d.id)];
+          return [conta(d), esc(d.motivo), feito ? '<span class="chip s-ok">' + esc(feito) + "</span>" : !state.podeEscrever ? "" :
+            '<span class="dono-acoes"><input list="lista-nomes" class="dono-nome" id="dn-' + esc(d.id) + '" placeholder="qual cliente?" aria-label="Qual cliente é">' +
+            '<button class="btn btn-brand" type="button" data-dono="minha" data-id="' + esc(d.id) + '" data-conta="' + esc(d.nome || "") + '">É minha</button> ' +
+            '<button class="btn btn-ghost" type="button" data-dono="outra" data-id="' + esc(d.id) + '" data-conta="' + esc(d.nome || "") + '">Não é minha</button></span>'];
+        }), "Nenhuma conta sem dono.") +
       bloco("Possíveis duplicados", "", ["Onde", "O que eu vi"], b.duplicados.map(function (d) { return [esc(d.onde), esc(d.texto)]; }), "Nenhum.");
 
     // novo cliente
@@ -945,6 +966,16 @@ tr.fin-nao td { opacity:.5 }
       state.conferindo = x.id; el("f-msg").className = "msg"; el("f-msg").textContent = "Confira a cliente e toque em Registrar.";
       el("cartao-form").scrollIntoView({ block: "start" }); el("f-nome").focus();
     }
+    var dn2 = ev.target.closest("[data-dono]");
+    if (dn2 && state.db) {
+      var idc = dn2.getAttribute("data-id"), qual = dn2.getAttribute("data-dono"), campo = el("dn-" + idc), cli = campo ? campo.value.trim() : "";
+      if (qual === "minha" && !cli) { if (campo) { campo.focus(); campo.placeholder = "escreva o nome da cliente"; } return; }
+      dn2.disabled = true;
+      state.db.collection("avisos_manuais").add({ acao: "dono", dono: qual, telegram_id: Number(idc), nome_conta: dn2.getAttribute("data-conta"),
+        cliente: cli, registrado_em: new Date().toISOString() }).then(function () {
+          state.donos[idc] = qual === "minha" ? "sua: " + cli : "não é sua"; render(); })
+        .catch(function () { dn2.disabled = false; });
+    }
     var av = ev.target.closest("[data-aviso]");
     if (av && state.db) {
       av.disabled = true;
@@ -982,11 +1013,20 @@ tr.fin-nao td { opacity:.5 }
   });
 
   // ---- cadastro manual ----
-  var PRECO = { mensal: 30, trimestral: 75, semestral: 129, anual: 219 }, NOVA = 10;
+  var PRECO = {}, NOVA = LOJA.primeiro_mes_nova;
+  Object.keys(LOJA.planos).forEach(function (p) { PRECO[p] = LOJA.planos[p].valor; });
+  // as listas de planos dos formulários saem da loja
+  ["n-plano", "f-plano"].forEach(function (id) {
+    var sel = document.getElementById(id); if (!sel) return;
+    sel.innerHTML = Object.keys(LOJA.planos).map(function (p) { return '<option value="' + p + '">' + esc(nomePlano(p)) + "</option>"; }).join("");
+  });
+  (function () { var t = document.getElementById("n-tipo"); if (!t) return;
+    t.options[0].textContent = NOVA != null ? "Nova — 1º mês R$ " + Number(NOVA).toFixed(2).replace(".", ",") : "Nova — valor normal"; })();
   var valorTocado = false, tipoTocado = false;
   function calcNovo() {
     var nome = el("n-nome").value.trim(), k = normal(nome), tipo = el("n-tipo").value, plano = el("n-plano").value;
-    var periodo = tipo === "nova" ? "mensal" : plano, esperado = tipo === "nova" ? NOVA : PRECO[plano];
+    var nova1 = tipo === "nova" && NOVA != null;
+    var periodo = nova1 ? (LOJA.plano_primeiro_mes || plano) : plano, esperado = nova1 ? NOVA : PRECO[plano];
     var valor = el("n-valor").value === "" ? null : parseFloat(el("n-valor").value);
     var pg = el("n-pagou").value ? parse(el("n-pagou").value) : null;
     var venc = pg ? somarMeses(pg, MESES_PLANO[periodo]) : null, conf = [];
@@ -1045,7 +1085,7 @@ tr.fin-nao td { opacity:.5 }
   daHash(); render();
 
   // dados: banco Supabase do Mascatinho (só a conta dela lê e grava)
-  var SB = window.supabase.createClient("https://ubxyayfgyadqsoivfkke.supabase.co", "sb_publishable_YIFCWKukeP5QhSp4iCEUpw_GP4WplyT");
+  var SB = window.supabase.createClient(LOJA.supabase_url, LOJA.supabase_chave);
   var TABELAS = { pagamentos: "pags", clientes_novos: "novos", avisos_manuais: "avisosM" };
   function erroSB(e) { return { code: e && /row-level|permission|JWT/i.test(e.message || "") ? "invalid_argument" : "unavailable", message: e && e.message } }
   state.db = {
@@ -1611,7 +1651,7 @@ tr.fin-nao td { opacity:.5 }
   function entrou(sessao) {
     el("tela-entrar").hidden = !!sessao;
     state.podeEscrever = !!sessao;
-    if (sessao) { el("ola").textContent = "Bem-vinda, Viviane! Aqui está o resumo do seu clube."; carregar(); }
+    if (sessao) { el("ola").textContent = (LOJA.saudacao || "Bem-vinda, Viviane!") + " Aqui está o resumo do seu clube."; carregar(); }
   }
   SB.auth.getSession().then(function (r) { entrou(r.data.session); });
   // 05/11: senha esquecida -> e-mail com link -> volta aqui e cria a senha nova (o Claude nunca vê a senha)
