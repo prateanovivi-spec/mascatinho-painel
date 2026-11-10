@@ -268,6 +268,7 @@ tr.fin-nao td { opacity:.5 }
     <span class="fresco" id="fresco">Carregando…</span>
   </div>
   <div class="aviso" id="aviso" hidden></div>
+  <div class="aviso" id="aviso-remocoes" hidden></div>
 
   <!-- PAINEL -->
   <section class="view" data-view="painel">
@@ -994,20 +995,28 @@ tr.fin-nao td { opacity:.5 }
       var lista = rt ? state.candidatas : [state.candidatas[+rm.getAttribute("data-remover")]];
       var ja = {}; state.remocoes.forEach(function (x) { ja[String(x.telegram_id)] = 1; });
       var todas = lista.filter(function (x) { return !(rt && x.manter); });
-      (rm || rt).disabled = true;
-      lista.filter(function (x) { return !ja[String(x["ID do Telegram"])]; }).reduce(function (pr, x) {
+      var botao = rm || rt, novas = lista.filter(function (x) { return !ja[String(x["ID do Telegram"])]; }), gravadas = 0;
+      botao.disabled = true;
+      novas.reduce(function (pr, x) {
         return pr.then(function () { return SB.from("remocoes").insert({ dados: { telegram_id: x["ID do Telegram"], nome: x["Nome no grupo"],
-          motivo: x.tipoLista + (x.Motivo ? ": " + x.Motivo : ""), aprovado_em: new Date().toISOString() } }); });
-      }, Promise.resolve()).then(carregar);
+          motivo: x.tipoLista + (x.Motivo ? ": " + x.Motivo : ""), aprovado_em: new Date().toISOString() } })
+          .then(function (r) { if (r.error) throw r.error; gravadas++; }); });
+      }, Promise.resolve()).then(carregar).catch(function (e) {            // 10/11: nunca falhar em silêncio
+        botao.disabled = false;
+        avisoRemocao("o pedido de remoção", e, novas.length > 1 ? gravadas + " de " + novas.length + " pedidos foram gravados antes do erro." : "");
+        carregar();
+      });
     }
     var es = ev.target.closest("[data-esposo-saiu]");
     if (es && state.db) { es.disabled = true; SB.from("remocoes").insert({ dados: { acao: "esposo_saiu", telegram_id: 0, nome: "vermelhas do esposo",
-      aprovado_em: new Date().toISOString() } }).then(carregar); }
+      aprovado_em: new Date().toISOString() } }).then(function (r) { if (r.error) throw r.error; carregar(); })
+      .catch(function (e) { es.disabled = false; avisoRemocao("o pedido de tirar as vermelhas do esposo", e, ""); }); }
     var mt = ev.target.closest("[data-manter]");
     if (mt && state.db && state.candidatas) {
       var xm = state.candidatas[+mt.getAttribute("data-manter")]; mt.disabled = true;
       SB.from("remocoes").insert({ dados: { acao: "manter", telegram_id: xm["ID do Telegram"], nome: xm["Nome no grupo"],
-        motivo: "mantida por ela no painel", aprovado_em: new Date().toISOString() } }).then(carregar);
+        motivo: "mantida por ela no painel", aprovado_em: new Date().toISOString() } }).then(function (r) { if (r.error) throw r.error; carregar(); })
+        .catch(function (e) { mt.disabled = false; avisoRemocao("o pedido de manter " + (xm["Nome no grupo"] || "a cliente") + " no grupo", e, ""); });
     }
     var cf = ev.target.closest("[data-conferir]");
     if (cf && state.acLista) {
@@ -1195,6 +1204,19 @@ tr.fin-nao td { opacity:.5 }
   // dados: banco Supabase do Mascatinho (só a conta dela lê e grava)
   var SB = window.supabase.createClient(LOJA.supabase_url, LOJA.supabase_chave);
   var TABELAS = { pagamentos: "pags", clientes_novos: "novos", avisos_manuais: "avisosM" };
+  function motivoSB(e) {                                                // 10/11: o motivo que o Supabase devolveu
+    if (!e) return "sem resposta do banco (sem internet?)";
+    var t = e.message || String(e);
+    if (e.code) t += " (código " + e.code + ")";
+    if (e.details) t += " — " + e.details;
+    if (/schema cache|does not exist|not find the table/i.test(t)) t += " → falta criar a tabela no Supabase";
+    else if (/row-level|permission|JWT|not allowed/i.test(t)) t += " → sem permissão (saia e entre de novo no painel)";
+    return t;
+  }
+  function avisoRemocao(oque, e, extra) {
+    alert("⚠️ Não consegui gravar " + oque + ".\n\nMotivo: " + motivoSB(e) + (extra ? "\n" + extra : "")
+      + "\n\nO que falhou NÃO foi gravado (o robô não vai fazer). Tente de novo em 1 minuto; se continuar, avise o Claude.");
+  }
   function erroSB(e) { return { code: e && /row-level|permission|JWT/i.test(e.message || "") ? "invalid_argument" : "unavailable", message: e && e.message } }
   state.db = {
     collection: function (nome) { return { add: function (obj) {
@@ -1743,7 +1765,10 @@ tr.fin-nao td { opacity:.5 }
       render();
     });
     SB.from("remocoes").select("id,dados,importado").order("criado", { ascending: false }).limit(300).then(function (r) {
-      if (r.error) return;
+      var fx = el("aviso-remocoes");                                   // 10/11: leitura com erro vira faixa, nunca silêncio
+      if (r.error) { fx.hidden = false; fx.textContent = "⚠️ Não consegui ler os pedidos de remoção: " + motivoSB(r.error)
+        + ". Os botões Remover/Manter podem não funcionar agora. Se continuar, avise o Claude."; return; }
+      fx.hidden = true;
       state.remocoes = (r.data || []).map(function (x) { return Object.assign({ id: x.id }, x.dados); });
       render();
     });
