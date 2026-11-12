@@ -255,6 +255,7 @@ tr.fin-nao td { opacity:.5 }
     <a href="#grupo" data-v="grupo"><svg viewBox="0 0 24 24"><path d="M21 4L3 11l6 2.2L18 7l-7 7.4V20l3.4-3.6L18 19z"/></svg><span>Grupo</span></a>
     <a href="#cobranca" data-v="cobranca"><svg viewBox="0 0 24 24"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 8 3 8H3s3-1 3-8"/><path d="M10 20a2 2 0 0 0 4 0"/></svg><span>Cobrança</span></a>
     <a href="#relatorios" data-v="relatorios"><svg viewBox="0 0 24 24"><path d="M4 20V10"/><path d="M10 20V4"/><path d="M16 20v-7"/><path d="M21 20H3"/></svg><span>Relatórios</span></a>
+    <a href="#convites" data-v="convites"><svg viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg><span>Convites</span></a>
     <a href="#financas" data-v="financas"><svg viewBox="0 0 24 24"><path d="M4 7.5h14.5a2 2 0 0 1 2 2V18a2 2 0 0 1-2 2H5.5a2 2 0 0 1-2-2V6.5a2 2 0 0 1 2-2H16"/><path d="M16 13.8h.01"/><path d="M20.5 11h-4a2.8 2.8 0 0 0 0 5.6h4"/></svg><span>Finanças</span></a>
   </nav>
   <div class="side-cta"><a class="btn btn-side" href="#pagamentos" data-novo="1"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Registrar pagamento</a></div>
@@ -434,6 +435,9 @@ tr.fin-nao td { opacity:.5 }
             <div class="form-fim"><button class="btn btn-brand" type="submit" id="cb-enviar">Combinar</button><span class="msg" id="cb-msg" role="status"></span></div>
           </form>
           <div id="cob-comb"></div></div>
+        <div class="cartao" id="cartao-ident"><h2>Campanha de identidade — avisos</h2>
+          <p class="explica">Avisos da campanha que ensina ao robô quem é cada cliente no Telegram. Só para você acompanhar: <b>nenhuma ação é necessária</b>. Cada aviso some sozinho quando a cliente entra por um dos links, quando o robô confirma quem ela é, ou quando ela deixa de fazer parte da campanha.</p>
+          <div id="ident-avisos"></div></div>
         <div class="cartao"><h2>Não vai renovar</h2>
           <p class="explica">Para quem avisou que não vai continuar: o robô <b>para de cobrar</b>, ela fica no grupo <b>até o vencimento</b> e sai no dia seguinte, <b>sem mensagem</b>. Se ela pagar depois, volta normalmente.<br>🩷 <b>Atalho:</b> mande para a cliente a sua figurinha "vou sentir sua falta" que o robô já marca sozinho (ensine a figurinha uma vez mandando-a para você mesma, na conversa "Você").</p>
           <div id="nr-sugestoes"></div>
@@ -463,6 +467,23 @@ tr.fin-nao td { opacity:.5 }
         a de cada mês também fica no PC em ROBÔ › MEUS ARQUIVOS › CLIENTES › PLANILHAS DO MÊS.</p>
         <button class="btn btn-brand" type="button" id="baixar-planilha">Baixar planilha do mês</button> <span class="sub" id="planilha-info"></span></div>
     </div>
+  </section>
+
+  <!-- CENTRAL DE CONVITES (12/11/2026): 1 toque gera, 1 toque copia ou compartilha -->
+  <section class="view" data-view="convites" hidden>
+    <div class="cartao"><h2>Central de Convites</h2>
+      <p class="explica">Toque no tipo: o link sai na hora. A cliente escolhe o plano e paga pelo Mercado Pago; o robô reconhece quem pagou e manda os convites do Telegram.</p>
+      <div class="form-fim" id="cv-tipos"></div>
+      <div id="cv-link" hidden>
+        <p class="sub" id="cv-cod"></p>
+        <input id="cv-url" readonly style="width:100%">
+        <div class="form-fim"><button class="btn btn-brand" type="button" id="cv-copiar">Copiar link</button>
+          <a class="btn btn-ghost" id="cv-zap" target="_blank" rel="noopener">Compartilhar no WhatsApp</a></div>
+      </div>
+      <p class="msg" id="cv-msg" role="status"></p>
+    </div>
+    <div class="cartao"><h2>Convites pagos para entregar</h2><div id="cv-entregar"></div></div>
+    <div class="cartao"><h2>Últimos convites</h2><div id="cv-ultimos"></div></div>
   </section>
 
   <!-- FINANÇAS (escopo aprovado por ela em 04/11/2026) -->
@@ -570,7 +591,7 @@ tr.fin-nao td { opacity:.5 }
     "atrasado": ["Atrasado", "s-atraso"], "saiu do grupo": ["Saiu do grupo", "s-saiu"], "precisa conferir": ["Conferir", "s-conf"]
   };
   var AV = ["k-mint", "k-lav", "k-butter", "k-blush"];
-  var TITULOS = { painel: "Painel", clientes: "Clientes", antigos: "Clientes antigas", pagamentos: "Pagamentos", planos: "Planos", cobranca: "Cobrança", novo: "Novo cliente", grupo: "Grupo do Telegram", relatorios: "Relatórios", financas: "Finanças" };
+  var TITULOS = { painel: "Painel", clientes: "Clientes", antigos: "Clientes antigas", pagamentos: "Pagamentos", planos: "Planos", cobranca: "Cobrança", novo: "Novo cliente", grupo: "Grupo do Telegram", relatorios: "Relatórios", financas: "Finanças", convites: "Central de Convites" };
   var state = { base: null, pags: [], novos: [], avisosM: [], remocoes: [], podeEscrever: false, filtroClientes: "todos", filtroPainel: "atencao", busca: "", db: null, nome: "",
     fin: { ok: null, linhas: [], clube: null, mes: "", filtro: "tudo", previa: null }, donos: {} };
 
@@ -942,6 +963,14 @@ tr.fin-nao td { opacity:.5 }
       return "<tr><td><div class='nome'>" + esc(c.nome) + "</div><div class='sub'>vence " + fmt(c.vence) + "</div></td><td><span class='chip s-venc'>até " + esc(fmt(parse(ate))) + "</span></td><td style='text-align:right'>" +
         (state.podeEscrever ? "<button class='btn btn-ghost' type='button' data-comb-desfazer='" + esc(c.k) + "' data-nome='" + esc(c.nome) + "'>Desfazer</button>" : "") + "</td></tr>";
     }).join("") + "</tbody></table></div>" : '<p class="vazio">Nenhuma data combinada agora.</p>';
+    // 12/11: avisos da campanha de identidade (até serem resolvidos)
+    renderConvites(b.central_convites || {});
+    var identAv = b.avisos_identidade || [];               // só informativo: o robô encerra sozinho
+    var TIPO_IDENT = { PAUSA: "rodada de hoje parou", ENVIO_PENDENTE: "mensagem pendente (o robô reenvia)", SEM_RETORNO_4_DIAS: "4 dias sem voltar" };
+    el("ident-avisos").innerHTML = identAv.length ? '<div class="rolar"><table><tbody>' + identAv.map(function (a) {
+      return "<tr><td><div class='nome'>" + esc(TIPO_IDENT[a.tipo] || a.tipo) + "</div><div class='sub'>" + esc(a.texto) +
+        " · " + esc(a.criado_em) + "</div></td></tr>";
+    }).join("") + "</tbody></table></div>" : '<p class="vazio">Nenhum aviso aberto.</p>';
     // 06/11: "não vai renovar" (sugestões do WhatsApp + confirmadas)
     var nrFeito = {}, sugFeita = {};
     (state.avisosM || []).forEach(function (a) {
@@ -973,6 +1002,53 @@ tr.fin-nao td { opacity:.5 }
   }
 
   // navegação
+  // ---------- Central de Convites ----------
+  var CV_NOMES = { PROMOCIONAL: "Promocional (1º mês R$ 10)", PADRAO: "Padrão" };
+  var CV_ESTADO = { CRIADO: "criado", ENTREGUE: "enviado", PAGO: "pago", CONVITES_GERADOS: "convites gerados",
+                    ENTROU_TELEGRAM: "entrou no grupo", IDENTIDADE_VINCULADA: "identidade vinculada" };
+  var cvUsados = {};
+  function cvZap(texto) { return "https://wa.me/?text=" + encodeURIComponent(texto); }
+  function renderConvites(cv) {
+    var est = cv.estoque || {};
+    el("cv-tipos").innerHTML = (cv.tipos || []).map(function (tp) {
+      var n = (est[tp] || []).filter(function (x) { return !cvUsados[x.codigo]; }).length;
+      return '<button class="btn btn-brand" type="button" data-cv="' + esc(tp) + '"' + (n ? "" : " disabled") + ">" +
+        esc(CV_NOMES[tp] || tp) + (n ? "" : " — aguarde") + "</button>";
+    }).join(" ");
+    var pagos = (cv.ultimos || []).filter(function (x) { return x.entrega === "central" && x.convites_telegram.length && x.estado === "CONVITES_GERADOS"; });
+    el("cv-entregar").innerHTML = pagos.length ? pagos.map(function (x) {
+      var txt = "Oi! Pagamento confirmado! 💖 Seus convites do grupo:\n" + x.convites_telegram.join("\n");
+      return "<p><b>" + esc(x.cliente || x.codigo) + "</b> · " + esc(x.codigo) + ' <a class="btn btn-ghost" target="_blank" rel="noopener" href="' +
+        cvZap(txt) + '">Mandar no WhatsApp</a></p>';
+    }).join("") : '<p class="vazio">Nada para entregar.</p>';
+    el("cv-ultimos").innerHTML = (cv.ultimos || []).length ? '<div class="rolar"><table><tbody>' + cv.ultimos.map(function (x) {
+      return "<tr><td><div class='nome'>" + esc(x.codigo) + " · " + esc(CV_NOMES[x.tipo] || x.tipo) + "</div><div class='sub'>" +
+        esc(CV_ESTADO[x.estado] || x.estado) + (x.cliente ? " · " + esc(x.cliente) : "") + " · " + esc(x.criado_em) + "</div></td></tr>";
+    }).join("") + "</tbody></table></div>" : '<p class="vazio">Nenhum convite ainda.</p>';
+  }
+  document.addEventListener("click", function (ev) {
+    var bt = ev.target.closest("[data-cv]"); if (!bt) return;
+    var tp = bt.getAttribute("data-cv"), lista = ((state.base.central_convites || {}).estoque || {})[tp] || [];
+    var livres = lista.filter(function (x) { return !cvUsados[x.codigo]; });
+    el("cv-msg").textContent = "";
+    function tentar(i) {
+      if (i >= livres.length) { el("cv-msg").textContent = "Acabaram os links prontos deste tipo. O robô repõe em até 15 minutos."; return; }
+      var x = livres[i]; cvUsados[x.codigo] = 1;
+      SB.from("convites_usados").insert({ dados: { codigo: x.codigo, em: new Date().toISOString().slice(0, 19).replace("T", " ") } }).then(function (r) {
+        if (r.error) return tentar(i + 1);            // já usado em outro aparelho: pega o próximo
+        el("cv-link").hidden = false; el("cv-cod").textContent = x.codigo + " · " + (CV_NOMES[tp] || tp);
+        el("cv-url").value = x.pagina; el("cv-zap").href = cvZap(x.pagina);
+        renderConvites(state.base.central_convites || {});
+      });
+    }
+    tentar(0);
+  });
+  el("cv-copiar") && el("cv-copiar").addEventListener("click", function () {
+    var u = el("cv-url"); u.select();
+    (navigator.clipboard ? navigator.clipboard.writeText(u.value) : Promise.reject()).catch(function () { document.execCommand("copy"); });
+    el("cv-msg").textContent = "Link copiado!";
+  });
+
   function mostrar(v) {
     if (!TITULOS[v]) v = "painel";
     document.querySelectorAll(".view").forEach(function (s) { s.hidden = s.getAttribute("data-view") !== v; });
