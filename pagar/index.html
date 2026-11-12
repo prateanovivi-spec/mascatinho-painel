@@ -20,6 +20,7 @@
     body { margin:0; background:var(--fundo); color:var(--texto); font-family:Nunito, system-ui, sans-serif; }
     header { text-align:center; padding:28px 16px 8px; background:linear-gradient(180deg,var(--rosa-claro),transparent); }
     .logo { font-family:"Dancing Script", cursive; font-size:46px; color:var(--vinho); margin:0; line-height:1 }
+    .logo-img { width:180px; max-width:60%; height:auto; border-radius:18px }
     .tag { letter-spacing:.25em; font-size:12px; font-weight:800; color:var(--vinho); margin:6px 0 0 }
     .intro { max-width:520px; margin:14px auto 0; font-size:16px }
     main { max-width:960px; margin:0 auto; padding:16px; display:grid; gap:14px; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); }
@@ -40,61 +41,52 @@
     .chave .caixa { background:var(--card); border:1.5px dashed var(--rosa); border-radius:14px; padding:14px }
     .chave b { font-size:22px; color:var(--vinho); letter-spacing:.04em }
     footer { text-align:center; padding:18px 16px 32px; font-size:15px }
+    body.neutra main, body.neutra .chave, body.neutra footer, body.neutra .intro { display:none }
     .aviso { position:fixed; left:50%; bottom:22px; transform:translateX(-50%); background:var(--vinho); color:#fff; padding:10px 16px; border-radius:99px; font-weight:700; display:none }
   </style>
 </head>
-<body>
+<body class="neutra">
   <header>
-    <p class="logo">Mascatinho</p>
-    <p class="tag">PAPEL COM AMOR 🦙</p>
+    <p class="logo">Mascatinho</p><p class="tag">PAPEL COM AMOR 🦙</p>
     <p class="intro">Escolha o seu pacote para renovar o acesso ao <b>Clube Mascatinho</b>: arquivos, cursos e novidades. 💖</p>
   </header>
   <main>
-    <article class="pacote">
+    <article class="pacote" data-i="0">
       
       <h2>Mensal</h2>
       <p class="preco">R$ 30,00</p>
       <p class="sub">1 mês de acesso</p>
-      <button class="btn pix-btn" type="button" data-codigo="00020126360014br.gov.bcb.pix0114+5511963153301520400005303986540530.005802BR5925VIVIANE APARECIDA AUGUSTO6009SAO PAULO62070503***6304F9B6">Copiar Pix copia e cola</button>
-      <button class="link-qr" type="button" data-qr="00020126360014br.gov.bcb.pix0114+5511963153301520400005303986540530.005802BR5925VIVIANE APARECIDA AUGUSTO6009SAO PAULO62070503***6304F9B6">ver QR code</button>
-      <div class="qr" hidden></div>
-      <a class="btn cartao-btn" href="https://mpago.li/31iFnnC" target="_blank" rel="noopener">💳 Pagar no cartão de crédito</a><p class="sub cartao-sub">no cartão: R$ 31,57 (com a taxa do cartão)</p>
+      <span class="btn pix-btn">Pagar com Pix</span>
+      <a class="btn cartao-btn" href="#" target="_blank" rel="noopener">💳 Pagar no cartão de crédito</a><p class="sub cartao-sub">no cartão: R$ 31,57 (com a taxa do cartão)</p>
     </article>
-    <article class="pacote">
+    <article class="pacote" data-i="1">
       
       <h2>Trimestral</h2>
       <p class="preco">R$ 75,00</p>
       <p class="sub">3 meses · sai R$ 25 por mês</p>
-      <button class="btn pix-btn" type="button" data-codigo="00020126360014br.gov.bcb.pix0114+5511963153301520400005303986540575.005802BR5925VIVIANE APARECIDA AUGUSTO6009SAO PAULO62070503***63045D02">Copiar Pix copia e cola</button>
-      <button class="link-qr" type="button" data-qr="00020126360014br.gov.bcb.pix0114+5511963153301520400005303986540575.005802BR5925VIVIANE APARECIDA AUGUSTO6009SAO PAULO62070503***63045D02">ver QR code</button>
-      <div class="qr" hidden></div>
-      <a class="btn cartao-btn" href="https://mpago.li/1iYbsLL" target="_blank" rel="noopener">💳 Pagar no cartão de crédito</a><p class="sub cartao-sub">no cartão: R$ 78,93 (com a taxa do cartão)</p>
+      <span class="btn pix-btn">Pagar com Pix</span>
+      <a class="btn cartao-btn" href="#" target="_blank" rel="noopener">💳 Pagar no cartão de crédito</a><p class="sub cartao-sub">no cartão: R$ 78,93 (com a taxa do cartão)</p>
     </article>
-    <article class="pacote">
+    <article class="pacote" data-i="2">
       
       <h2>Semestral</h2>
       <p class="preco">R$ 129,00</p>
       <p class="sub">6 meses · sai R$ 21,50 por mês</p>
-      <button class="btn pix-btn" type="button" data-codigo="00020126360014br.gov.bcb.pix0114+55119631533015204000053039865406129.005802BR5925VIVIANE APARECIDA AUGUSTO6009SAO PAULO62070503***6304890C">Copiar Pix copia e cola</button>
-      <button class="link-qr" type="button" data-qr="00020126360014br.gov.bcb.pix0114+55119631533015204000053039865406129.005802BR5925VIVIANE APARECIDA AUGUSTO6009SAO PAULO62070503***6304890C">ver QR code</button>
-      <div class="qr" hidden></div>
-      <a class="btn cartao-btn" href="https://mpago.li/1S6sPn6" target="_blank" rel="noopener">💳 Pagar no cartão de crédito</a><p class="sub cartao-sub">no cartão: R$ 135,76 (com a taxa do cartão)</p>
+      <span class="btn pix-btn">Pagar com Pix</span>
+      <a class="btn cartao-btn" href="#" target="_blank" rel="noopener">💳 Pagar no cartão de crédito</a><p class="sub cartao-sub">no cartão: R$ 135,76 (com a taxa do cartão)</p>
     </article>
-    <article class="pacote destaque">
+    <article class="pacote destaque" data-i="3">
       <span class="selo">mais econômico</span>
       <h2>Anual</h2>
       <p class="preco">R$ 219,00</p>
       <p class="sub">12 meses · sai R$ 18,25 por mês</p>
-      <button class="btn pix-btn" type="button" data-codigo="00020126360014br.gov.bcb.pix0114+55119631533015204000053039865406219.005802BR5925VIVIANE APARECIDA AUGUSTO6009SAO PAULO62070503***6304663E">Copiar Pix copia e cola</button>
-      <button class="link-qr" type="button" data-qr="00020126360014br.gov.bcb.pix0114+55119631533015204000053039865406219.005802BR5925VIVIANE APARECIDA AUGUSTO6009SAO PAULO62070503***6304663E">ver QR code</button>
-      <div class="qr" hidden></div>
-      <a class="btn cartao-btn" href="https://mpago.li/1HEp5yn" target="_blank" rel="noopener">💳 Pagar no cartão de crédito</a><p class="sub cartao-sub">no cartão: R$ 230,48 (com a taxa do cartão)</p>
+      <span class="btn pix-btn">Pagar com Pix</span>
+      <a class="btn cartao-btn" href="#" target="_blank" rel="noopener">💳 Pagar no cartão de crédito</a><p class="sub cartao-sub">no cartão: R$ 230,48 (com a taxa do cartão)</p>
     </article>
   </main>
   <section class="chave">
     <div class="caixa">
-      Prefere digitar? Chave Pix (celular):<br><b>11963153301</b><br>
-      <button class="btn pix-btn" type="button" data-codigo="11963153301" style="max-width:260px;margin:10px auto 0">Copiar chave Pix</button>
+      
     </div>
   </section>
   <footer>Depois de pagar, <b>me mande o comprovante no WhatsApp</b> (na mesma conversa). Obrigada! 💖</footer>
@@ -107,6 +99,42 @@
       if (navigator.clipboard && window.isSecureContext) { navigator.clipboard.writeText(t).then(ok, function () { velho(t); ok(); }); } else { velho(t); ok(); }
     }
     function velho(t) { var x = document.createElement("textarea"); x.value = t; x.style.position = "fixed"; x.style.opacity = "0"; document.body.appendChild(x); x.select(); try { document.execCommand("copy"); } catch (e) {} document.body.removeChild(x); }
+    // 06/11: link SÓ DA CLIENTE (#c=…&p=…): cada pacote paga no Mercado Pago (Pix ou cartão) e confirma sozinho
+    (function () {
+      var h = {}; location.hash.replace(/^#/, "").split("&").forEach(function (x) { var i = x.indexOf("="); if (i > 0) h[x.slice(0, i)] = decodeURIComponent(x.slice(i + 1)); });
+      if (!h.c || !h.p) return;
+      try {
+        var b = atob(h.p.replace(/-/g, "+").replace(/_/g, "/") + "===".slice((h.p.length + 3) % 4)), ids = [];
+        for (var i = 0; i + 16 <= b.length; i += 16) {
+          var hex = ""; for (var j = i; j < i + 16; j++) hex += ("0" + b.charCodeAt(j).toString(16)).slice(-2);
+          ids.push(h.c + "-" + hex.slice(0, 8) + "-" + hex.slice(8, 12) + "-" + hex.slice(12, 16) + "-" + hex.slice(16, 20) + "-" + hex.slice(20));
+        }
+      } catch (e) { return; }
+      var MP = "https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=";
+      // Central de Convites (12/11): x=1 = convite PROMOCIONAL — o 1º par de botões é o 1º mês de cliente nova
+      var o = 0;
+      if (h.x === "1" && ids.length >= 2) {
+        o = 2;
+        var pr = document.createElement("article"); pr.className = "pacote destaque";
+        pr.innerHTML = '<span class="selo">1º mês</span><h2>Primeiro mês</h2><p class="preco">R$ 10,00</p>'
+          + '<p class="sub">oferta de boas-vindas · depois segue o plano mensal</p>'
+          + '<a class="btn pix-btn" target="_blank" rel="noopener" href="' + MP + ids[0] + '">Pagar com Pix</a>'
+          + '<a class="btn cartao-btn" target="_blank" rel="noopener" href="' + MP + ids[1] + '">💳 Pagar no cartão de crédito</a>';
+        var p1 = document.querySelector("article.pacote"); if (p1) p1.parentNode.insertBefore(pr, p1);
+      }
+      document.querySelectorAll("article.pacote[data-i]").forEach(function (a) {
+        var n = +a.getAttribute("data-i"), pix = ids[o + 2 * n], cartao = ids[o + 2 * n + 1];
+        if (!pix) return;
+        var bp = a.querySelector(".pix-btn"), q = a.querySelector(".link-qr"), box = a.querySelector(".qr"), bc = a.querySelector(".cartao-btn");
+        var np = document.createElement("a"); np.className = "btn pix-btn"; np.href = MP + pix; np.target = "_blank"; np.rel = "noopener"; np.textContent = "Pagar com Pix";
+        bp.replaceWith(np); if (q) q.remove(); if (box) box.remove();
+        if (bc && cartao) bc.href = MP + cartao;
+      });
+      var cx = document.querySelector(".caixa"); if (cx) cx.style.display = "none";
+      if (ids.length >= 2) document.body.classList.remove("neutra");   // só um endereço válido mostra os planos
+      var ft = document.querySelector("footer"); if (ft) ft.innerHTML = "O pagamento é confirmado <b>na hora</b> pelo Mercado Pago: não precisa mandar comprovante. 💖";
+      var it = document.querySelector(".intro"); if (it && h.n) it.innerHTML = "Oi, <b>" + h.n.replace(/[<>&"]/g, "") + "</b>! " + it.innerHTML;
+    })();
     document.querySelectorAll("[data-codigo]").forEach(function (b) { b.addEventListener("click", function () { copiar(b.getAttribute("data-codigo"), b); }); });
     document.querySelectorAll("[data-qr]").forEach(function (b) {
       b.addEventListener("click", function () {
