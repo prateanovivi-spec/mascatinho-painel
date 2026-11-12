@@ -132,7 +132,7 @@
       });
       var cx = document.querySelector(".caixa"); if (cx) cx.style.display = "none";
       if (ids.length >= 2) document.body.classList.remove("neutra");   // só um endereço válido mostra os planos
-      var ft = document.querySelector("footer"); if (ft) ft.innerHTML = "O pagamento é confirmado <b>na hora</b> pelo Mercado Pago: não precisa mandar comprovante. 💖";
+      var ft = document.querySelector("footer"); if (ft) ft.innerHTML = "O pagamento é confirmado <b>na hora</b> pelo Mercado Pago. Depois de pagar, <b>me mande o comprovante no WhatsApp</b> (na mesma conversa). Obrigada! 💖";
       var it = document.querySelector(".intro"); if (it && h.n) it.innerHTML = "Oi, <b>" + h.n.replace(/[<>&"]/g, "") + "</b>! " + it.innerHTML;
     })();
     document.querySelectorAll("[data-codigo]").forEach(function (b) { b.addEventListener("click", function () { copiar(b.getAttribute("data-codigo"), b); }); });
