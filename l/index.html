@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Pagamento</title>
+<style>
+  body { margin:0; min-height:100vh; display:flex; align-items:center; justify-content:center; background:#fff8fa;
+         font-family: system-ui, -apple-system, "Segoe UI", sans-serif; color:#3d2a30 }
+  @media (prefers-color-scheme: dark) { body { background:#1c1517; color:#f3e7ea } }
+</style>
+</head>
+<body>
+<!-- Link curto do Atendimento (13/11/2026): <painel>/l/#LNK-... -> a página oficial de pagamento daquele convite.
+     O endereço completo vem da tabela pública links_curtos (só códigos e endereços de pagamento, nenhum dado de
+     cliente). Sem código válido: página neutra, sem texto. -->
+<p id="m" aria-live="polite"></p>
+<script>
+(function () {
+  var LOJAS = {
+    "mascatinho-painel": { url: "https://ubxyayfgyadqsoivfkke.supabase.co", chave: "sb_publishable_YIFCWKukeP5QhSp4iCEUpw_GP4WplyT" },
+    "handspaper-painel": { url: "https://rnuqxhequsyslrimjuqi.supabase.co", chave: "sb_publishable_vffglRZ5_eTxKmqYAA1-cw_FhtfKtV1" }
+  };
+  var loja = LOJAS[(location.pathname.split("/")[1] || "")] || LOJAS["mascatinho-painel"];
+  var cod = (location.hash || "").replace(/^#/, "");
+  if (!/^(LNK|COB)-[A-Z]+-\d{6}$/.test(cod)) return;
+  document.getElementById("m").textContent = "Abrindo…";
+  fetch(loja.url + "/rest/v1/links_curtos?select=pagina&codigo=eq." + encodeURIComponent(cod),
+        { headers: { apikey: loja.chave, Authorization: "Bearer " + loja.chave } })
+    .then(function (r) { return r.ok ? r.json() : []; })
+    .then(function (l) {
+      var p = l && l[0] && l[0].pagina;
+      if (p && /^https:\/\/(prateanovivi-spec\.github\.io|www\.mercadopago\.com\.br)\//.test(p)) { location.replace(p); }
+      else { document.getElementById("m").textContent = ""; }
+    })
+    .catch(function () { document.getElementById("m").textContent = ""; });
+})();
+</script>
+</body>
+</html>
