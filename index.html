@@ -436,6 +436,8 @@ tr.fin-nao td { opacity:.5 }
           </form>
           <div id="cob-comb"></div></div>
         <div class="cartao" id="cartao-ident"><h2>Campanha de identidade — avisos</h2>
+          <p class="sub" id="ident-medida"></p>
+          <div id="ident-evolucao"></div>
           <p class="explica">Avisos da campanha que ensina ao robô quem é cada cliente no Telegram. Só para você acompanhar: <b>nenhuma ação é necessária</b>. Cada aviso some sozinho quando a cliente entra por um dos links, quando o robô confirma quem ela é, ou quando ela deixa de fazer parte da campanha.</p>
           <div id="ident-avisos"></div></div>
         <div class="cartao"><h2>Não vai renovar</h2>
@@ -980,6 +982,21 @@ tr.fin-nao td { opacity:.5 }
     renderConvites(b.central_convites || {});
     var identAv = b.avisos_identidade || [];               // só informativo: o robô encerra sozinho
     var TIPO_IDENT = { PAUSA: "rodada de hoje parou", ENVIO_PENDENTE: "mensagem pendente (o robô reenvia)", SEM_RETORNO_4_DIAS: "4 dias sem voltar" };
+    var idm = b.identificacao || {};                       // R1: quanto o robô conhece (definitivas / ativas)
+    el("ident-medida").innerHTML = idm.ativas ? "O robô conhece com certeza <b>" + idm.niveis.DEFINITIVA + " de " + idm.ativas +
+      "</b> clientes (" + idm["definitivas_%"] + "%) · prováveis " + idm.niveis.PROVAVEL + " · dependem de você " + idm.dependem_da_dona : "";
+    // R2: evolução diária das identidades definitivas (barra por dia) + última rodada
+    var ev = idm.evolucao || [], ur = idm.ultima_rodada;
+    el("ident-evolucao").innerHTML = (ev.length ? '<div class="rolar"><table><tbody>' + ev.slice(-14).reverse().map(function (d) {
+        var p = d["definitivas_%"] || 0;
+        return "<tr><td style='white-space:nowrap'>" + esc(d.data.slice(8, 10) + "/" + d.data.slice(5, 7)) + "</td><td style='width:100%'>" +
+          "<div style='background:var(--brand,#a8556a);height:10px;border-radius:5px;width:" + Math.max(2, p) + "%'></div></td><td style='white-space:nowrap'><b>" +
+          p + "%</b> (" + d.definitivas + "/" + d.ativas + ")</td></tr>";
+      }).join("") + "</tbody></table></div>" : "") +
+      (ur ? "<p class='sub'>Última rodada (" + esc(ur.data.slice(8, 10) + "/" + ur.data.slice(5, 7)) + " " + esc(ur.hora || "") + "): " +
+        ur.consultadas + " consultas · <b>+" + ur.evolucao.definitivas + "</b> definitivas" +
+        (ur.novas_definitivas.length ? " (" + ur.novas_definitivas.map(function (x) { return esc(x.cliente); }).join(", ") + ")" : "") +
+        (ur.parou ? " · parou: " + esc(ur.parou) : "") + "</p>" : "");
     el("ident-avisos").innerHTML = identAv.length ? '<div class="rolar"><table><tbody>' + identAv.map(function (a) {
       return "<tr><td><div class='nome'>" + esc(TIPO_IDENT[a.tipo] || a.tipo) + "</div><div class='sub'>" + esc(a.texto) +
         " · " + esc(a.criado_em) + "</div></td></tr>";
