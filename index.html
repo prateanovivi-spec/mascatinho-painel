@@ -449,9 +449,9 @@ tr.fin-nao td { opacity:.5 }
           </form>
           <div id="nr-lista"></div></div>
         <div class="cartao"><h2>Como funciona</h2><ul class="regras">
-          <li><b>5 dias antes</b>, <b>poucos dias antes</b> e <b>no dia</b>: lembrete com o link de pagamento só da cliente (Mercado Pago).</li>
+          <li><b>3 dias antes</b> e <b>no dia</b> ("É hoje"): lembrete com o link de pagamento só da cliente (Mercado Pago).</li>
           <li><b>1 dia depois</b>: sai do grupo se não pagou, não avisou atraso e não combinou outra data.</li>
-          <li><b>2 dias depois</b>: mensagem de saudades para quem saiu.</li>
+          <li><b>5 dias depois</b>: mensagem de saudades para quem saiu.</li>
           <li>Nunca sai: pacote vigente, quem pagou, comprovante esperando você, quem avisou atraso, data combinada ou nome sem certeza.</li>
           <li><b>Não vai renovar</b>: sem cobrança; sai no dia seguinte ao vencimento, sem mensagem. Você marca aqui, confirma o que o robô viu no WhatsApp ou manda a figurinha "vou sentir sua falta".</li>
           <li>Freio: se mais de 20 sairiam no mesmo dia, ninguém sai e você recebe um aviso.</li></ul></div>
@@ -951,9 +951,8 @@ tr.fin-nao td { opacity:.5 }
     el("cob-listas").innerHTML =
       blocoCob("Saem do grupo hoje (D+1)", cb.sair || [], "Ninguém sai hoje.", function (x) { return "⚠ " + esc(x.motivo); }) +
       blocoCob("É hoje (vence hoje)", cb.d0 || [], "Ninguém vence hoje.") +
-      blocoCob("Faltam poucos dias", cb.d2 || [],"Ninguém nesta etapa hoje.") +
-      blocoCob("Lembrete 5 dias antes", cb.d5 || [], "Ninguém nesta etapa hoje.") +
-      blocoCob("Estamos com saudades (saiu há 2 dias)", cb.saudades || [], "Ninguém nesta etapa hoje.") +
+      blocoCob("Faltam 3 dias", cb.d2 || [],"Ninguém nesta etapa hoje.") +
+      blocoCob("Estamos com saudades (5 dias depois)", cb.saudades || [], "Ninguém nesta etapa hoje.") +
       blocoCob("Venceu, mas NÃO sai (protegida)", cb.nao_sai || [], "Ninguém protegido hoje.", function (x) { return "🛡 " + esc((x.por_que_nao || []).join("; ")); }) +
       '<div class="cartao"><h2>Histórico de saídas <span class="chip s-lanc">' + (b.saidas || []).length + "</span></h2>" +
         ((b.saidas || []).length ? '<div class="rolar"><table><thead><tr><th>Data</th><th>Cliente</th><th>Motivo</th><th>Resultado</th></tr></thead><tbody>' +
@@ -1081,8 +1080,10 @@ tr.fin-nao td { opacity:.5 }
         atdAtual = x;
         var modelo = msgs[b.id === "renovacao" ? "RENOVACAO" : b.tipo] || "{link}";
         el("atd-link").hidden = false; el("atd-cod").textContent = b.nome.replace("🔄 ", "") + " · " + x.codigo;
-        el("atd-url").value = x.pagina;
-        el("atd-zap").href = cvZap(modelo.replace("{link}", x.pagina)); el("atd-zap-link").href = cvZap(x.pagina);
+        var cv0 = (state.base || {}).central_convites || {};
+        var url = (cv0.link_curto && (cv0.curtos || {})[x.codigo]) || x.pagina;       // link curto quando ligado
+        el("atd-url").value = url;
+        el("atd-zap").href = cvZap(modelo.replace("{link}", url)); el("atd-zap-link").href = cvZap(url);
         renderConvites(state.base.central_convites || {});
         el("atd-link").scrollIntoView({ behavior: "smooth", block: "center" });
       });
