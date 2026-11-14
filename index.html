@@ -446,6 +446,11 @@ tr.fin-nao td { opacity:.5 }
         <div class="cartao"><h2>Saúde da base</h2>
           <p class="explica">Quanto a base está confiável, contando cada cliente uma vez só. Atualiza sozinho a cada sincronização. Só informativo.</p>
           <div id="saude-base"></div></div>
+        <div class="cartao"><h2>Conferência Comercial</h2>
+          <p class="explica">Pareceres do robô sobre pagamentos, vencimentos e planos. <b>Nada é alterado sozinho</b>: cada caso espera a sua decisão, que fica gravada para sempre. Ordenados pela prioridade.</p>
+          <div id="cc-resumo"></div><div id="cc-pendentes"></div>
+          <details><summary>Resolvidos</summary><div id="cc-resolvidos"></div></details>
+          <details><summary>Arquivados</summary><div id="cc-arquivados"></div></details></div>
         <div class="cartao"><h2>Não vai renovar</h2>
           <p class="explica">Para quem avisou que não vai continuar: o robô <b>para de cobrar</b>, ela fica no grupo <b>até o vencimento</b> e sai no dia seguinte, <b>sem mensagem</b>. Se ela pagar depois, volta normalmente.<br>🩷 <b>Atalho:</b> mande para a cliente a sua figurinha "vou sentir sua falta" que o robô já marca sozinho (ensine a figurinha uma vez mandando-a para você mesma, na conversa "Você").</p>
           <div id="nr-sugestoes"></div>
@@ -1006,6 +1011,25 @@ tr.fin-nao td { opacity:.5 }
       return "<tr><td><div class='nome'>" + esc(TIPO_IDENT[a.tipo] || a.tipo) + "</div><div class='sub'>" + esc(a.texto) +
         " · " + esc(a.criado_em) + "</div></td></tr>";
     }).join("") + "</tbody></table></div>" : '<p class="vazio">Nenhum aviso aberto.</p>';
+    // 14/11: Conferência Comercial (pareceres; nada muda sozinho)
+    var ccm = b.conferencia_comercial || {}, cce = ccm.estatisticas || {};
+    function ccLinhas(l, vazio) {
+      return l && l.length ? '<div class="rolar"><table><tbody>' + l.map(function (c) {
+        var d = c.decisao;
+        return "<tr><td><div class='nome'>" + esc((c.clientes || []).join(", ")) + " <span class='chip'>" + esc(c.prioridade || "") + "</span></div><div class='sub'>" +
+          esc(c.situacao || "") + "<br>origem: " + esc((c.origens || []).join(" + ")) + " · impacto: " + esc(c.impacto || "") + " · gravidade: " + esc(c.gravidade || "") +
+          " · confiança " + (c.confianca || 0) + "<br>A: " + esc(c.proposta_a || "") + (c.proposta_b ? "<br>B: " + esc(c.proposta_b) : "") +
+          (c.recomendada ? "<br><b>recomendado:</b> " + esc(c.recomendada) : "") +
+          (d ? "<br><b>decisão</b> " + esc(d.em + " " + d.hora) + " (" + esc(d.quem) + "): " + esc(d.decisao) + " — " + esc(d.motivo || "") : "") + "</div></td></tr>";
+      }).join("") + "</tbody></table></div>" : '<p class="vazio">' + vazio + '</p>';
+    }
+    el("cc-resumo").innerHTML = cce.total !== undefined ? "<p class='sub'>" + cce.total + " casos · <b>" + cce.pendentes + " pendentes</b> (alta " +
+      ((cce.por_prioridade || {}).Alta || 0) + " · média " + ((cce.por_prioridade || {})["Média"] || 0) + " · baixa " + ((cce.por_prioridade || {}).Baixa || 0) +
+      ") · resolvidos por você " + (cce.resolvidos_pela_dona || 0) + " · arquivados " + (cce.arquivados || 0) +
+      (cce.tempo_medio_horas !== null && cce.tempo_medio_horas !== undefined ? " · tempo médio " + cce.tempo_medio_horas + " h" : "") + "</p>" : "";
+    el("cc-pendentes").innerHTML = ccLinhas(ccm.pendentes, "Nenhum caso pendente.");
+    el("cc-resolvidos").innerHTML = ccLinhas(ccm.resolvidos, "Nenhum ainda.");
+    el("cc-arquivados").innerHTML = ccLinhas(ccm.arquivados, "Nenhum ainda.");
     // 14/11 (etapa 2): índice de saúde da base
     var sb = b.saude_base || {}, sbi = sb.identidade || {}, sbp = sb.pendencias || {};
     el("saude-base").innerHTML = sb.clientes_ativas ? '<div class="rolar"><table><tbody>' + [
