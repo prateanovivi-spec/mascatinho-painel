@@ -31,7 +31,7 @@
     .then(function (r) { return r.ok ? r.json() : []; })
     .then(function (l) {
       var p = l && l[0] && l[0].pagina;
-      if (p && /^https:\/\/(prateanovivi-spec\.github\.io|www\.mercadopago\.com\.br)\//.test(p)) { location.replace(p); }
+      if (p && /^https:\/\/(prateanovivi-spec\.github\.io|www\.mercadopago\.com\.br)\//.test(p)) { location.replace(p + (p.indexOf("#") >= 0 ? "&l=" : "#l=") + encodeURIComponent(cod)); }
       else { document.getElementById("m").textContent = ""; }
     })
     .catch(function () { document.getElementById("m").textContent = ""; });

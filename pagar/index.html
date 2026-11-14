@@ -39,6 +39,8 @@
     .chave b { font-size:22px; color:var(--vinho); letter-spacing:.04em }
     footer { text-align:center; padding:18px 16px 32px; font-size:15px }
     body.neutra main, body.neutra .chave, body.neutra footer, body.neutra .intro { display:none }
+    .promo-tel { margin-top:12px; text-align:left } .promo-tel input[type=tel] { width:100%; font-size:18px; padding:12px; border-radius:12px; border:1.5px solid var(--borda); margin:6px 0 }
+    .promo-fora { display:block; font-size:13px; margin:2px 0 6px } .promo-erro { color:#c0392b; font-weight:700 }
     .aviso { position:fixed; left:50%; bottom:22px; transform:translateX(-50%); background:var(--vinho); color:#fff; padding:10px 16px; border-radius:99px; font-weight:700; display:none }
   </style>
 </head>
@@ -108,16 +110,49 @@
         }
       } catch (e) { return; }
       var MP = "https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=";
+      var SB_URL = "https://ubxyayfgyadqsoivfkke.supabase.co", SB_CHAVE = "sb_publishable_YIFCWKukeP5QhSp4iCEUpw_GP4WplyT";
       // Central de Convites (12/11): x=1 = convite PROMOCIONAL — o 1º par de botões é o 1º mês de cliente nova
       var o = 0;
       if (h.x === "1" && ids.length >= 2) {
         o = 2;
         var pr = document.createElement("article"); pr.className = "pacote destaque";
+        // 14/11 (regra dela): no 1º mês, ANTES de pagar, o celular do Telegram é obrigatório (só aqui)
         pr.innerHTML = '<span class="selo">1º mês</span><h2>Primeiro mês</h2><p class="preco">R$ 10,00</p>'
           + '<p class="sub">oferta de boas-vindas · depois segue o plano mensal</p>'
-          + '<a class="btn pix-btn" target="_blank" rel="noopener" href="' + MP + ids[0] + '">Pagar com Pix</a>'
-          + '<a class="btn cartao-btn" target="_blank" rel="noopener" href="' + MP + ids[1] + '">💳 Pagar no cartão de crédito</a>';
+          + '<button class="btn pix-btn" type="button" data-promo="' + MP + ids[0] + '">Pagar com Pix</button>'
+          + '<button class="btn cartao-btn" type="button" data-promo="' + MP + ids[1] + '">💳 Pagar no cartão de crédito</button>'
+          + '<div class="promo-tel" hidden><label for="promo-num"><b>Número do celular cadastrado no Telegram</b></label>'
+          + '<input id="promo-num" type="tel" inputmode="numeric" autocomplete="tel" placeholder="(11) 91234-5678" maxlength="16">'
+          + '<label class="promo-fora"><input type="checkbox" id="promo-fora"> meu número é de outro país</label>'
+          + '<p class="sub">Esse número será utilizado para liberar automaticamente seu acesso ao Clube Mascatinho. '
+          + 'Informe exatamente o número da conta do Telegram que você utilizará para entrar no grupo.</p>'
+          + '<p class="promo-erro" hidden>Digite o celular completo, com DDD.</p>'
+          + '<button class="btn pix-btn" type="button" id="promo-seguir">Continuar para o pagamento</button></div>';
         var p1 = document.querySelector("article.pacote"); if (p1) p1.parentNode.insertBefore(pr, p1);
+        var destino = "", num = pr.querySelector("#promo-num"), fora = pr.querySelector("#promo-fora");
+        function soDig(v) { return (v || "").replace(/\D/g, ""); }
+        function mascara() {
+          if (fora.checked) { num.value = "+" + soDig(num.value).slice(0, 15); return; }
+          var d = soDig(num.value).replace(/^55(?=\d{10,11}$)/, "").slice(0, 11);
+          num.value = d.length > 7 ? "(" + d.slice(0, 2) + ") " + d.slice(2, d.length - 4) + "-" + d.slice(-4)
+                    : d.length > 2 ? "(" + d.slice(0, 2) + ") " + d.slice(2) : d;
+        }
+        num.addEventListener("input", mascara); fora.addEventListener("change", mascara);
+        pr.querySelectorAll("[data-promo]").forEach(function (b) {
+          b.addEventListener("click", function () { destino = b.getAttribute("data-promo"); pr.querySelector(".promo-tel").hidden = false; num.focus(); });
+        });
+        pr.querySelector("#promo-seguir").addEventListener("click", function () {
+          var d = soDig(num.value), ok = fora.checked ? d.length >= 8 && d.length <= 15 : d.length === 11 && d[2] === "9";
+          pr.querySelector(".promo-erro").hidden = ok;
+          if (!ok || !destino) return;
+          var tel = fora.checked ? d : "55" + d, ir = function () { location.href = destino; };
+          if (!h.l || !SB_URL) return ir();                    // sem código/banco: segue (o robô confere na entrada)
+          var feito = false, seg = setTimeout(function () { if (!feito) { feito = true; ir(); } }, 6000);
+          fetch(SB_URL + "/rest/v1/telefones_promocional", { method: "POST",
+            headers: { apikey: SB_CHAVE, Authorization: "Bearer " + SB_CHAVE, "Content-Type": "application/json", Prefer: "return=minimal" },
+            body: JSON.stringify({ codigo: h.l, telefone: tel, outro_pais: fora.checked }) })
+            .catch(function () {}).then(function () { if (!feito) { feito = true; clearTimeout(seg); ir(); } });
+        });
       }
       document.querySelectorAll("article.pacote[data-i]").forEach(function (a) {
         var n = +a.getAttribute("data-i"), pix = ids[o + 2 * n], cartao = ids[o + 2 * n + 1];
