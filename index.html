@@ -443,6 +443,9 @@ tr.fin-nao td { opacity:.5 }
         <div class="cartao"><h2>Apelidos</h2>
           <p class="explica">Os nomes antigos de cada cliente que apontam para ela. O robô <b>está em observação</b>: ele só conta o que teria aprendido e não cria nenhum apelido sozinho. Só identidade, nada de pagamento.</p>
           <div id="apelidos-resumo"></div><div id="apelidos-lista"></div></div>
+        <div class="cartao"><h2>Saúde da base</h2>
+          <p class="explica">Quanto a base está confiável, contando cada cliente uma vez só. Atualiza sozinho a cada sincronização. Só informativo.</p>
+          <div id="saude-base"></div></div>
         <div class="cartao"><h2>Não vai renovar</h2>
           <p class="explica">Para quem avisou que não vai continuar: o robô <b>para de cobrar</b>, ela fica no grupo <b>até o vencimento</b> e sai no dia seguinte, <b>sem mensagem</b>. Se ela pagar depois, volta normalmente.<br>🩷 <b>Atalho:</b> mande para a cliente a sua figurinha "vou sentir sua falta" que o robô já marca sozinho (ensine a figurinha uma vez mandando-a para você mesma, na conversa "Você").</p>
           <div id="nr-sugestoes"></div>
@@ -1003,6 +1006,17 @@ tr.fin-nao td { opacity:.5 }
       return "<tr><td><div class='nome'>" + esc(TIPO_IDENT[a.tipo] || a.tipo) + "</div><div class='sub'>" + esc(a.texto) +
         " · " + esc(a.criado_em) + "</div></td></tr>";
     }).join("") + "</tbody></table></div>" : '<p class="vazio">Nenhum aviso aberto.</p>';
+    // 14/11 (etapa 2): índice de saúde da base
+    var sb = b.saude_base || {}, sbi = sb.identidade || {}, sbp = sb.pendencias || {};
+    el("saude-base").innerHTML = sb.clientes_ativas ? '<div class="rolar"><table><tbody>' + [
+        ["Clientes ativas", sb.clientes_ativas], ["Identidade 100 (confirmada)", sbi["100"]], ["Identidade 95 (convite individual)", sbi["95"]],
+        ["Identidade 90 (Telegram pelo telefone)", sbi["90"]], ["Identidade 70 (só telefone)", sbi["70"]], ["Identidade 50 (só nome)", sbi["50"]],
+        ["Sem identidade", sbi["sem identidade"]], ["<b>Identidade forte (90+)</b>", "<b>" + sb["identidade_forte_%"] + "%</b>"],
+        ["Apelidos ativos", sb.apelidos_ativos], ["Sugestões de apelido", sb.sugestoes], ["Conflitos", sb.conflitos],
+        ["Sem telefone", sbp["Sem telefone"]], ["Sem Telegram", sbp["Sem Telegram"]], ["Conta fora do grupo", sbp["Conta fora do grupo"]],
+        ["Outros motivos", sbp["Outros motivos"]]].map(function (x) {
+          return "<tr><td>" + x[0] + "</td><td style='text-align:right'>" + (x[1] === undefined ? 0 : x[1]) + "</td></tr>"; }).join("") +
+      "</tbody></table></div><p class='sub'>atualizado " + esc(sb.atualizado || "") + "</p>" : '<p class="vazio">Ainda sem dados.</p>';
     // 14/11: aba Apelidos (só identidade; modo observação)
     var ap = b.apelidos || {}, apt = ap.total || {}, apo = ap.observacao || {};
     function dh(t) { return t ? esc(String(t).slice(8, 10) + "/" + String(t).slice(5, 7)) : "—"; }
