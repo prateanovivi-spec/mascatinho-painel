@@ -440,6 +440,9 @@ tr.fin-nao td { opacity:.5 }
           <div id="ident-evolucao"></div>
           <p class="explica">Avisos da campanha que ensina ao robô quem é cada cliente no Telegram. Só para você acompanhar: <b>nenhuma ação é necessária</b>. Cada aviso some sozinho quando a cliente entra por um dos links, quando o robô confirma quem ela é, ou quando ela deixa de fazer parte da campanha.</p>
           <div id="ident-avisos"></div></div>
+        <div class="cartao"><h2>Apelidos</h2>
+          <p class="explica">Os nomes antigos de cada cliente que apontam para ela. O robô <b>está em observação</b>: ele só conta o que teria aprendido e não cria nenhum apelido sozinho. Só identidade, nada de pagamento.</p>
+          <div id="apelidos-resumo"></div><div id="apelidos-lista"></div></div>
         <div class="cartao"><h2>Não vai renovar</h2>
           <p class="explica">Para quem avisou que não vai continuar: o robô <b>para de cobrar</b>, ela fica no grupo <b>até o vencimento</b> e sai no dia seguinte, <b>sem mensagem</b>. Se ela pagar depois, volta normalmente.<br>🩷 <b>Atalho:</b> mande para a cliente a sua figurinha "vou sentir sua falta" que o robô já marca sozinho (ensine a figurinha uma vez mandando-a para você mesma, na conversa "Você").</p>
           <div id="nr-sugestoes"></div>
@@ -1000,6 +1003,19 @@ tr.fin-nao td { opacity:.5 }
       return "<tr><td><div class='nome'>" + esc(TIPO_IDENT[a.tipo] || a.tipo) + "</div><div class='sub'>" + esc(a.texto) +
         " · " + esc(a.criado_em) + "</div></td></tr>";
     }).join("") + "</tbody></table></div>" : '<p class="vazio">Nenhum aviso aberto.</p>';
+    // 14/11: aba Apelidos (só identidade; modo observação)
+    var ap = b.apelidos || {}, apt = ap.total || {}, apo = ap.observacao || {};
+    function dh(t) { return t ? esc(String(t).slice(8, 10) + "/" + String(t).slice(5, 7)) : "—"; }
+    el("apelidos-resumo").innerHTML = ap.total ? "<p class='sub'><b>" + (apt.apelidos || 0) + "</b> apelidos em <b>" + (apt.clientes_com_apelidos || 0) +
+      "</b> clientes · aguardando conferência " + (ap.aguardando_conferencia || 0) + "<br>Observação" + (apo.desde ? " desde " + dh(apo.desde) : "") +
+      ": teria criado " + (apo.teria_criado || 0) + " · sugestões " + (apo.sugestoes || 0) + " · conflitos " + ((apo.conflitos_nomes || 0) + (apo.conflitos_uso || 0)) +
+      " · usos confirmados " + (apo.usos_confirmados || 0) + " de " + (apo.usos || 0) + "</p>" : '<p class="vazio">Ainda sem dados de apelidos.</p>';
+    var apl = (ap.lista || []).slice().sort(function (x, y) { return (y.usos || 0) - (x.usos || 0); });
+    el("apelidos-lista").innerHTML = apl.length ? '<div class="rolar"><table><tbody>' + apl.map(function (a) {
+      return "<tr><td><div class='nome'>" + esc(a.apelido) + " → " + esc(a.cliente) + "</div><div class='sub'>origem: " + esc(a.origem || "—") +
+        " · 1º uso " + dh(a.primeira_utilizacao) + " · último " + dh(a.ultima_utilizacao) + " · " + (a.usos || 0) + " usos</div></td><td style='white-space:nowrap'>criação " +
+        (a.confianca_criacao || 0) + " · uso " + (a.confianca_uso || 0) + "</td><td><span class='chip'>" + esc(a.status || "ativo") + "</span></td></tr>";
+    }).join("") + "</tbody></table></div>" : "";
     // 06/11: "não vai renovar" (sugestões do WhatsApp + confirmadas)
     var nrFeito = {}, sugFeita = {};
     (state.avisosM || []).forEach(function (a) {
