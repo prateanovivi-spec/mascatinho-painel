@@ -125,7 +125,7 @@
         var bp = a.querySelector(".pix-btn"), q = a.querySelector(".link-qr"), box = a.querySelector(".qr"), bc = a.querySelector(".cartao-btn");
         var np = document.createElement("a"); np.className = "btn pix-btn"; np.href = MP + pix; np.target = "_blank"; np.rel = "noopener"; np.textContent = "Pagar com Pix";
         bp.replaceWith(np); if (q) q.remove(); if (box) box.remove();
-        if (bc && cartao) bc.href = MP + cartao;
+        if (bc && cartao) { bc.href = MP + cartao; bc.style.display = ""; var cs = a.querySelector(".cartao-sub"); if (cs) cs.style.display = ""; }
       });
       var cx = document.querySelector(".caixa"); if (cx) cx.style.display = "none";
       if (ids.length >= 2) document.body.classList.remove("neutra");   // só um endereço válido mostra os planos
