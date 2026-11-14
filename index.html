@@ -1016,10 +1016,12 @@ tr.fin-nao td { opacity:.5 }
     function ccLinhas(l, vazio) {
       return l && l.length ? '<div class="rolar"><table><tbody>' + l.map(function (c) {
         var d = c.decisao;
-        return "<tr><td><div class='nome'>" + esc((c.clientes || []).join(", ")) + " <span class='chip'>" + esc(c.prioridade || "") + "</span></div><div class='sub'>" +
+        return "<tr><td><div class='nome'>" + esc(c.id || "") + " · " + esc((c.clientes || []).join(", ")) + " <span class='chip'>" + esc(c.prioridade || "") + "</span></div><div class='sub'>" +
           esc(c.situacao || "") + "<br>origem: " + esc((c.origens || []).join(" + ")) + " · impacto: " + esc(c.impacto || "") + " · gravidade: " + esc(c.gravidade || "") +
           " · confiança " + (c.confianca || 0) + "<br>A: " + esc(c.proposta_a || "") + (c.proposta_b ? "<br>B: " + esc(c.proposta_b) : "") +
           (c.recomendada ? "<br><b>recomendado:</b> " + esc(c.recomendada) : "") +
+          ((c.relacionados || []).length ? "<br>relacionado com: " + esc(c.relacionados.join(", ")) : "") +
+          ((c.causas_raiz || []).length ? "<br>causa raiz: " + esc(c.causas_raiz.join(", ")) : "") +
           (d ? "<br><b>decisão</b> " + esc(d.em + " " + d.hora) + " (" + esc(d.quem) + "): " + esc(d.decisao) + " — " + esc(d.motivo || "") : "") + "</div></td></tr>";
       }).join("") + "</tbody></table></div>" : '<p class="vazio">' + vazio + '</p>';
     }
