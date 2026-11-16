@@ -111,6 +111,15 @@
       } catch (e) { return; }
       var MP = "https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=";
       var SB_URL = "https://ubxyayfgyadqsoivfkke.supabase.co", SB_CHAVE = "sb_publishable_YIFCWKukeP5QhSp4iCEUpw_GP4WplyT";
+      // 16/11: k= traz o Pix "copia e cola" de cada plano (criado pela API); sem ele, vale o botão do Mercado Pago
+      var cods = [];
+      try { if (h.k) cods = decodeURIComponent(escape(atob(h.k.replace(/-/g, "+").replace(/_/g, "/") + "===".slice((h.k.length + 3) % 4)))).split("|"); } catch (e) { cods = []; }
+      function esc(t) { return String(t).replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;"); }
+      function pixHtml(cod, pref) {
+        return '<button class="btn pix-btn" type="button" data-codigo="' + esc(cod) + '">Copiar Pix copia e cola</button>'
+          + '<button class="link-qr" type="button" data-qr="' + esc(cod) + '">ver QR code</button><div class="qr" hidden></div>'
+          + '<p class="sub"><a href="' + MP + pref + '" target="_blank" rel="noopener">ou pague pelo Mercado Pago</a></p>';
+      }
       // Central de Convites (12/11): x=1 = convite PROMOCIONAL — o 1º par de botões é o 1º mês de cliente nova
       var o = 0;
       if (h.x === "1" && ids.length >= 2) {
@@ -158,8 +167,14 @@
         var n = +a.getAttribute("data-i"), pix = ids[o + 2 * n], cartao = ids[o + 2 * n + 1];
         if (!pix) return;
         var bp = a.querySelector(".pix-btn"), q = a.querySelector(".link-qr"), box = a.querySelector(".qr"), bc = a.querySelector(".cartao-btn");
-        var np = document.createElement("a"); np.className = "btn pix-btn"; np.href = MP + pix; np.target = "_blank"; np.rel = "noopener"; np.textContent = "Pagar com Pix";
-        bp.replaceWith(np); if (q) q.remove(); if (box) box.remove();
+        var cod = cods[(o / 2) + n];
+        if (cod) {
+          var dv = document.createElement("div"); dv.innerHTML = pixHtml(cod, pix);
+          bp.replaceWith.apply(bp, Array.prototype.slice.call(dv.childNodes)); if (q) q.remove(); if (box) box.remove();
+        } else {
+          var np = document.createElement("a"); np.className = "btn pix-btn"; np.href = MP + pix; np.target = "_blank"; np.rel = "noopener"; np.textContent = "Pagar com Pix";
+          bp.replaceWith(np); if (q) q.remove(); if (box) box.remove();
+        }
         if (bc && cartao) { bc.href = MP + cartao; bc.style.display = ""; var cs = a.querySelector(".cartao-sub"); if (cs) cs.style.display = ""; }
       });
       var cx = document.querySelector(".caixa"); if (cx) cx.style.display = "none";
