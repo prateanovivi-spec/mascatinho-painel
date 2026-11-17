@@ -728,7 +728,7 @@ tr.fin-nao td { opacity:.5 }
     var bAviso = state.podeEscrever && c.s !== "saiu do grupo" ? '<button class="icon-btn" type="button" data-aviso="' + esc(c.k) + '" data-nome="' + esc(c.nome) + '" data-tem="' + (c.aviso ? "1" : "") +
       '" title="' + (c.aviso ? "Tirar o aviso de atraso de " : "Marcar que avisou atraso: ") + esc(c.nome) + '" aria-label="' + (c.aviso ? "Tirar aviso de atraso" : "Marcar aviso de atraso") +
       '"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>' + (c.aviso ? '<path d="M5 5l14 14"/>' : "") + "</svg></button>" : "";
-    var acao = bAviso + (state.podeEscrever ? '<button class="icon-btn" type="button" data-pagar="' + esc(c.nome) + '" data-plano="' + esc(c.plano || LOJA.plano_padrao) + '" title="Registrar pagamento de ' + esc(c.nome) + '" aria-label="Registrar pagamento de ' + esc(c.nome) + '"><svg viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg></button>' : "");
+    var acao = bAviso + (state.podeEscrever ? '<button class="icon-btn" type="button" data-pagar="' + esc(c.nome) + '" data-cid="' + esc(c.cliente_id || "") + '" data-plano="' + esc(c.plano || LOJA.plano_padrao) + '" title="Registrar pagamento de ' + esc(c.nome) + '" aria-label="Registrar pagamento de ' + esc(c.nome) + '"><svg viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg></button>' : "");
     return "<tr><td><div class='pessoa'><span class='av " + AV[i % 4] + "'>" + esc(iniciais(c.nome)) + "</span><div><div class='nome'>" + esc(c.nome) + "</div>" + nota + "</div></div></td>" +
       "<td>" + esc(MESES_PLANO[c.plano] ? nomePlano(c.plano) : "Conferir") + "</td><td>" + reais(c.valor) + "</td>" +
       "<td>" + fmt(c.vence) + (c.confirmado && c.confirmado.so_mes && !c.online ? "<div class='sub'>dia a confirmar</div>" : "") + "</td>" +
@@ -1168,11 +1168,12 @@ tr.fin-nao td { opacity:.5 }
     var a = ev.target.closest("a[href^='#']");
     if (a) {
       var f = a.getAttribute("data-filtro"); if (f) { state.filtroClientes = f; render(); }
-      if (a.hasAttribute("data-novo")) setTimeout(function () { el("f-nome").focus(); }, 0);
+      if (a.hasAttribute("data-novo")) { state.pagarCid = null; setTimeout(function () { el("f-nome").focus(); }, 0); }
       ev.preventDefault(); location.hash = a.getAttribute("href"); daHash(); window.scrollTo(0, 0);
     }
     var p = ev.target.closest("[data-pagar]");
-    if (p) { el("f-nome").value = p.getAttribute("data-pagar"); el("f-plano").value = p.getAttribute("data-plano"); location.hash = "#pagamentos"; daHash(); el("f-data").focus(); }
+    if (p) { el("f-nome").value = p.getAttribute("data-pagar"); state.pagarCid = p.getAttribute("data-cid") || null;   // 17/11 (E3.6): o ID da linha clicada
+             el("f-plano").value = p.getAttribute("data-plano"); location.hash = "#pagamentos"; daHash(); el("f-data").focus(); }
     var rm = ev.target.closest("[data-remover]"), rt = ev.target.closest("[data-remover-todas]");
     if ((rm || rt) && state.db && state.candidatas) {
       var lista = rt ? state.candidatas : [state.candidatas[+rm.getAttribute("data-remover")]];
@@ -1204,7 +1205,7 @@ tr.fin-nao td { opacity:.5 }
     var cf = ev.target.closest("[data-conferir]");
     if (cf && state.acLista) {
       var x = state.acLista[+cf.getAttribute("data-conferir")];
-      el("f-nome").value = x.cliente_sugerida || x.nome_agenda || x.pagador || "";
+      el("f-nome").value = x.cliente_sugerida || x.nome_agenda || x.pagador || ""; state.pagarCid = null;
       if (x.plano_pelo_valor) el("f-plano").value = x.plano_pelo_valor;
       if (x.data) el("f-data").value = x.data;
       el("f-valor").value = x.valor || "";
@@ -1217,7 +1218,7 @@ tr.fin-nao td { opacity:.5 }
       var kk = tb.getAttribute("data-tel"), campoT = el("tel-" + kk), dig = (campoT ? campoT.value : "").replace(/\D/g, "");
       if (dig.length < 10 || dig.length > 13) { if (campoT) { campoT.focus(); campoT.placeholder = "DDD + número (10 ou 11 dígitos)"; campoT.value = ""; } return; }
       tb.disabled = true;
-      state.db.collection("avisos_manuais").add({ acao: "telefone", k: kk, nome: tb.getAttribute("data-nome"), telefone: dig, registrado_em: new Date().toISOString() })
+      state.db.collection("avisos_manuais").add({ acao: "telefone", k: kk, cliente_id: cidDaLinha(kk), nome: tb.getAttribute("data-nome"), telefone: dig, registrado_em: new Date().toISOString() })
         .catch(function () { tb.disabled = false; });
     }
     var cd = ev.target.closest("[data-comb-desfazer]");
@@ -1259,7 +1260,7 @@ tr.fin-nao td { opacity:.5 }
       var k = av.getAttribute("data-aviso"), nome = av.getAttribute("data-nome"), tem = av.getAttribute("data-tem");
       var existe = state.avisosM.find(function (a) { return a.k === k; });
       var feito = existe ? state.db.doc("avisos_manuais/" + existe.id).delete() :
-        state.db.collection("avisos_manuais").add({ k: k, nome: nome, acao: tem ? "remover" : "marcar", data: el("f-data").value, obs: tem ? "" : "avisou atraso (marcado no painel)", registrado_em: new Date().toISOString() });
+        state.db.collection("avisos_manuais").add({ k: k, cliente_id: cidDaLinha(k), nome: nome, acao: tem ? "remover" : "marcar", data: el("f-data").value, obs: tem ? "" : "avisou atraso (marcado no painel)", registrado_em: new Date().toISOString() });
       feito.catch(function () { av.disabled = false; });
     }
     var dn = ev.target.closest("[data-apagar-novo]");
@@ -1274,7 +1275,7 @@ tr.fin-nao td { opacity:.5 }
     var achada = state.base && state.base.clientes.find(function (c) { return c.nome.toLowerCase() === nome.toLowerCase(); });
     if (!achada) { el("nr-msg").textContent = "Escolha o nome da lista (comece a digitar e toque no nome)."; el("nr-msg").className = "msg erro"; return; }
     el("nr-enviar").disabled = true;
-    state.db.collection("avisos_manuais").add({ acao: "nao_renova", k: achada.k, nome: achada.nome, registrado_em: new Date().toISOString() })
+    state.db.collection("avisos_manuais").add({ acao: "nao_renova", k: achada.k, cliente_id: achada.cliente_id || null, nome: achada.nome, registrado_em: new Date().toISOString() })
       .then(function () { el("nr-msg").textContent = "✔ Marcado. O robô para de cobrar; ela fica até o vencimento."; el("nr-msg").className = "msg ok"; el("nr-nome").value = ""; })
       .catch(function () { el("nr-msg").textContent = "Não salvou. Tente de novo."; el("nr-msg").className = "msg erro"; })
       .then(function () { el("nr-enviar").disabled = false; });
@@ -1286,12 +1287,17 @@ tr.fin-nao td { opacity:.5 }
     if (!achada) { el("cb-msg").textContent = "Escolha o nome da lista (comece a digitar e toque no nome)."; el("cb-msg").className = "msg erro"; return; }
     if (!ate) return;
     el("cb-enviar").disabled = true;
-    state.db.collection("avisos_manuais").add({ acao: "combinado", k: achada.k, nome: achada.nome, ate: ate, registrado_em: new Date().toISOString() })
+    state.db.collection("avisos_manuais").add({ acao: "combinado", k: achada.k, cliente_id: achada.cliente_id || null, nome: achada.nome, ate: ate, registrado_em: new Date().toISOString() })
       .then(function () { el("cb-msg").textContent = "✔ Combinado. Até essa data o robô não cobra nem tira do grupo."; el("cb-msg").className = "msg ok"; el("cb-nome").value = ""; })
       .catch(function () { el("cb-msg").textContent = "Não salvou. Tente de novo."; el("cb-msg").className = "msg erro"; })
       .then(function () { el("cb-enviar").disabled = false; });
   });
 
+  // 17/11 (E3.6): o cliente_id de uma linha da base (pela chave da linha)
+  function cidDaLinha(k) {
+    var c = state.base && state.base.clientes.find(function (x) { return x.k === k; });
+    return (c && c.cliente_id) || null;
+  }
   // formulário
   el("f-data").value = new Date(Date.now() - new Date().getTimezoneOffset() * 6e4).toISOString().slice(0, 10);
   el("form-pag").addEventListener("submit", function (ev) {
@@ -1299,7 +1305,9 @@ tr.fin-nao td { opacity:.5 }
     var nome = el("f-nome").value.trim(), msg = el("f-msg");
     if (!nome || !state.db) return;
     var achada = state.base && state.base.clientes.find(function (c) { return c.nome.toLowerCase() === nome.toLowerCase(); });
-    var doc = { nome: achada ? achada.nome : nome, k: achada ? achada.k : normal(nome), plano: el("f-plano").value, data: el("f-data").value,
+    // 17/11 (E3.6): o cliente_id da linha clicada é a referência principal; o nome fica para conferência
+    var cidLinha = state.pagarCid || (achada && achada.cliente_id) || null; state.pagarCid = null;
+    var doc = { nome: achada ? achada.nome : nome, k: achada ? achada.k : normal(nome), cliente_id: cidLinha, plano: el("f-plano").value, data: el("f-data").value,
       valor: parseFloat(el("f-valor").value) || null, obs: el("f-obs").value.trim(), origem: state.conferindo ? "whatsapp (aprovado por você)" : "painel online",
       conferir_id: state.conferindo || null, registrado_em: new Date().toISOString() };
     state.conferindo = null;
